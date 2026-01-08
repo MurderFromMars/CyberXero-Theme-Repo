@@ -1,0 +1,75 @@
+[066657be-3095-41ae-a614-8ee33ef967b4]
+Description=Application settings for steam
+adaptivesync=false
+adaptivesyncrule=2
+clientmachine=localhost
+wmclass=steamwebhelper steam
+wmclasscomplete=true
+wmclassmatch=1
+
+[076a9d30-5700-4253-a405-10c35fe0e4c4]
+Description=Application settings for org.kde.dolphin
+opacityactive=85
+opacityactiverule=2
+wmclass=dolphin org.kde.dolphin
+wmclasscomplete=true
+wmclassmatch=1
+
+[233d4877-0c86-4e79-bfa6-20d899ae3c6e]
+Description=Application settings for org.gnome.Meld
+opacityactive=80
+opacityactiverule=2
+wmclass=python3.13 org.gnome.Meld
+wmclasscomplete=true
+wmclassmatch=1
+
+[71da1d31-f62e-4e89-93b4-2a652ba8f1f0]
+Description=Application settings for octopi
+opacityactive=85
+opacityactiverule=2
+wmclass=octopi
+wmclassmatch=1
+
+[8467b58c-a1e1-4559-9696-32e77b3f6174]
+Description=Application settings for CachyOSHello
+opacityactive=85
+opacityactiverule=2
+wmclass=cachyos-hello CachyOSHello
+wmclasscomplete=true
+wmclassmatch=1
+
+[86c77aae-440d-428c-b6fd-56351cb283ca]
+Description=Application settings for vesktop
+adaptivesync=false
+adaptivesyncrule=2
+opacityactive=85
+opacityactiverule=2
+wmclass=vesktop
+wmclassmatch=1
+
+[General]
+count=9
+rules=aabb1361-2267-4078-b973-91989311aac1,233d4877-0c86-4e79-bfa6-20d899ae3c6e,71da1d31-f62e-4e89-93b4-2a652ba8f1f0,066657be-3095-41ae-a614-8ee33ef967b4,ea2e093e-c484-4414-819e-f176c6f31464,8467b58c-a1e1-4559-9696-32e77b3f6174,b5ca3e21-55e5-4000-97f9-41a49398449e,076a9d30-5700-4253-a405-10c35fe0e4c4,86c77aae-440d-428c-b6fd-56351cb283ca
+
+[aabb1361-2267-4078-b973-91989311aac1]
+Description=Application settings for kcm_kwinrules
+opacityactive=85
+opacityactiverule=2
+wmclass=kcmshell6 kcm_kwinrules
+wmclasscomplete=true
+wmclassmatch=1
+
+[b5ca3e21-55e5-4000-97f9-41a49398449e]
+Description=Application settings for systemsettings
+opacityactive=85
+opacityactiverule=2
+wmclass=systemsettings
+wmclassmatch=1
+
+[ea2e093e-c484-4414-819e-f176c6f31464]
+Description=Application settings for org.kde.plasmashell
+opacityactive=85
+opacityactiverule=2
+wmclass=plasmashell org.kde.plasmashell
+wmclasscomplete=true
+wmclassmatch=1
