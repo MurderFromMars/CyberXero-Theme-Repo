@@ -33,7 +33,7 @@ kwinrc
 kwinrulesrc  
 Plasma applet rc files  
 
-Then reboot to apply the full CyberXero layout.
+Then reboot to apply the full CyberXero layout. keep in mind you will need to manually select the color scheme/icons under colors and themes in plasma settings once finished.
 
 You may need to reassign the application launcher icon.  
 Right click the launcher area, open Configure, and set your preferred icon.
