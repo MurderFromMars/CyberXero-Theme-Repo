@@ -16,7 +16,7 @@ CyberXero delivers a dark, high‑contrast interface with vibrant cyan and magen
 Unzip the archive. Move all folders except YAMIS into:
 ~/.config
 
-Move the YAMIS icon pack into:
+Extract the zip and move the YAMIS icon pack into:
 ~/.local/share/icons
 
 Move CyberXero.colors into:
