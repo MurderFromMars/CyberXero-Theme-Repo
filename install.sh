@@ -126,7 +126,8 @@ install_dependencies() {
 build_panel_colorizer() {
     log "compiling plasma‑panel‑colorizer…"
 
-    local tmp="$(mktemp -d)"
+    local tmp
+    tmp="$(mktemp -d)"
     git clone https://github.com/luisbocanegra/plasma-panel-colorizer "$tmp/src"
 
     cd "$tmp/src"
@@ -141,7 +142,8 @@ build_panel_colorizer() {
 build_kurve() {
     log "compiling kurve…"
 
-    local tmp="$(mktemp -d)"
+    local tmp
+    tmp="$(mktemp -d)"
     git clone https://github.com/luisbocanegra/kurve "$tmp/src"
 
     cd "$tmp/src"
@@ -167,7 +169,8 @@ install_krohnkite() {
 
     log "installing krohnkite…"
 
-    local tmp="$(mktemp -d)"
+    local tmp
+    tmp="$(mktemp -d)"
     git clone https://codeberg.org/anametologin/Krohnkite "$tmp/src"
 
     cd "$tmp/src"
@@ -182,7 +185,8 @@ install_krohnkite() {
 build_kde_rounded_corners() {
     log "compiling kde‑rounded‑corners…"
 
-    local tmp="$(mktemp -d)"
+    local tmp
+    tmp="$(mktemp -d)"
     git clone https://github.com/matinlotfali/KDE-Rounded-Corners "$tmp/src"
 
     cd "$tmp/src"
@@ -261,6 +265,20 @@ deploy_rc_files() {
             warn "missing → $rc"
         fi
     done
+}
+
+deploy_kwinrules() {
+    log "deploying kwinrulesrc…"
+
+    local file="kwinrulesrc"
+
+    if [ -f "$REPO_DIR/$file" ]; then
+        backup_file "$HOME/.config/$file"
+        cp "$REPO_DIR/$file" "$HOME/.config/$file"
+        ok "rules → $file"
+    else
+        warn "missing → $file"
+    fi
 }
 
 deploy_yamis_icons() {
@@ -381,6 +399,7 @@ main() {
 
     deploy_config_folders
     deploy_rc_files
+    deploy_kwinrules
     deploy_yamis_icons
     deploy_color_scheme
     apply_kde_theme_settings
