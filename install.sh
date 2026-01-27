@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+[ -z "$BASH_VERSION" ] && exec bash "$0" "$@"
 set -euo pipefail
 
 ########################################
@@ -7,10 +8,6 @@ set -euo pipefail
 
 REPO_DIR="$HOME/CyberXero-Theme-Repo"
 BACKUP_DIR="$HOME/CyberXero-backup-$(date +%Y%m%d_%H%M%S)"
-
-# ────────────────────────────────────────────────
-# LOGGING
-# ────────────────────────────────────────────────
 
 log()  { printf "\033[1;36m[Ξ]\033[0m %s\n" "$1"; }
 ok()   { printf "\033[1;32m[✔]\033[0m %s\n" "$1"; }
@@ -25,10 +22,6 @@ backup_file() {
         log "backup → $target"
     fi
 }
-
-# ────────────────────────────────────────────────
-# FETCH REPOSITORY
-# ────────────────────────────────────────────────
 
 fetch_repo() {
     log "syncing CyberXero repository…"
@@ -48,10 +41,6 @@ ensure_repo() {
     [ -d "$REPO_DIR" ] || { err "repository missing"; exit 1; }
 }
 
-# ────────────────────────────────────────────────
-# DISTRO DETECTION
-# ────────────────────────────────────────────────
-
 DISTRO="unknown"
 
 detect_distro() {
@@ -68,10 +57,6 @@ detect_distro() {
         exit 1
     fi
 }
-
-# ────────────────────────────────────────────────
-# DEPENDENCIES
-# ────────────────────────────────────────────────
 
 install_arch_aur_pkg() {
     local pkg="$1"
@@ -118,10 +103,6 @@ install_dependencies() {
         *)      err "invalid distro state"; exit 1 ;;
     esac
 }
-
-# ────────────────────────────────────────────────
-# BUILD FROM SOURCE
-# ────────────────────────────────────────────────
 
 build_panel_colorizer() {
     log "compiling plasma‑panel‑colorizer…"
@@ -200,10 +181,6 @@ build_kde_rounded_corners() {
     ok "rounded corners installed"
 }
 
-# ────────────────────────────────────────────────
-# KYANITE INSTALLATION
-# ────────────────────────────────────────────────
-
 install_kyanite() {
     log "deploying kyanite kwinscript…"
 
@@ -225,10 +202,6 @@ install_kyanite() {
 
     ok "kyanite installed → $target"
 }
-
-# ────────────────────────────────────────────────
-# CONFIG DEPLOYMENT
-# ────────────────────────────────────────────────
 
 deploy_config_folders() {
     log "deploying configuration modules…"
@@ -307,10 +280,6 @@ deploy_color_scheme() {
     fi
 }
 
-# ────────────────────────────────────────────────
-# THEME ACTIVATION
-# ────────────────────────────────────────────────
-
 apply_kde_theme_settings() {
     log "activating neon theme parameters…"
 
@@ -318,14 +287,12 @@ apply_kde_theme_settings() {
     backup_file "$cfg"
     touch "$cfg"
 
-    # Color Scheme
     if grep -q "^ColorScheme=" "$cfg"; then
         sed -i "s/^ColorScheme=.*/ColorScheme=CyberXero/" "$cfg"
     else
         echo "ColorScheme=CyberXero" >> "$cfg"
     fi
 
-    # Icons
     if ! grep -q "^
 
 \[Icons\]
@@ -351,10 +318,6 @@ apply_kde_theme_settings() {
     ok "theme activated → CyberXero + YAMIS"
 }
 
-# ────────────────────────────────────────────────
-# PLASMA RELOAD
-# ────────────────────────────────────────────────
-
 reload_plasmashell() {
     log "reloading plasma shell…"
 
@@ -376,10 +339,6 @@ reload_plasmashell() {
 
     ok "plasmashell restarted"
 }
-
-# ────────────────────────────────────────────────
-# MAIN EXECUTION
-# ────────────────────────────────────────────────
 
 main() {
     printf "\n\033[1;35m┌──────────────────────────────────────────────┐\n"
