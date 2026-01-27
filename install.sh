@@ -93,7 +93,7 @@ install_arch_dependencies() {
     log "installing arch dependencies…"
 
     sudo pacman -S --needed --noconfirm \
-        git cmake extra-cmake-modules base-devel
+        git cmake extra-cmake-modules base-devel unzip
 
     install_arch_aur_pkg qt5-tools
     ok "arch dependencies installed"
@@ -104,7 +104,7 @@ install_debian_dependencies() {
 
     sudo apt update
     sudo apt install -y \
-        git cmake g++ extra-cmake-modules kwin-dev \
+        git cmake g++ extra-cmake-modules kwin-dev unzip \
         qt6-base-private-dev qt6-base-dev-tools \
         libkf6kcmutils-dev libdrm-dev libplasma-dev
 
@@ -194,6 +194,32 @@ build_kde_rounded_corners() {
     cd ~
     rm -rf "$tmp"
     ok "rounded corners installed"
+}
+
+# ────────────────────────────────────────────────
+# KYANITE INSTALLATION
+# ────────────────────────────────────────────────
+
+install_kyanite() {
+    log "deploying kyanite kwinscript…"
+
+    local script="$REPO_DIR/kyanite.kwinscript"
+    local target="$HOME/.local/share/kwin/scripts/kyanite"
+
+    if [ ! -f "$script" ]; then
+        warn "kyanite.kwinscript missing in repo"
+        return
+    fi
+
+    if [ -d "$target" ]; then
+        ok "kyanite already installed"
+        return
+    fi
+
+    mkdir -p "$target"
+    unzip -q "$script" -d "$target"
+
+    ok "kyanite installed → $target"
 }
 
 # ────────────────────────────────────────────────
@@ -351,6 +377,7 @@ main() {
     build_kurve
     install_krohnkite
     build_kde_rounded_corners
+    install_kyanite
 
     deploy_config_folders
     deploy_rc_files
