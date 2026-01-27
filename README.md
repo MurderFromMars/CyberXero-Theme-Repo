@@ -19,8 +19,8 @@ CyberXero includes:
 
 Run this command in any shell:
 
-```bash
-sh -c "$(curl -fsSL https://raw.githubusercontent.com/MurderFromMars/CyberXero-Theme-Repo/main/install.sh)"
+```
+bash <(curl -fsSL https://raw.githubusercontent.com/MurderFromMars/CyberXero-Theme-Repo/main/install.sh)
 ```
 
 The installer will:
