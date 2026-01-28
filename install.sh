@@ -3,11 +3,12 @@
 set -euo pipefail
 
 ########################################
-# CYBERXERO :: KDE TWM INITIALIZER
+# CYBERXERO :: NEON SYSTEM INITIALIZER
 ########################################
 
 REPO_DIR="$HOME/CyberXero-Theme-Repo"
 BACKUP_DIR="$HOME/CyberXero-backup-$(date +%Y%m%d_%H%M%S)"
+DISTRO="unknown"
 
 log()  { printf "\033[1;36m[Ξ]\033[0m %s\n" "$1"; }
 ok()   { printf "\033[1;32m[✔]\033[0m %s\n" "$1"; }
@@ -104,23 +105,19 @@ build_panel_colorizer() {
 }
 
 build_kurve() {
-    log "installing kurve plasmoid…"
+    log "installing kurve…"
 
     local tmp
     tmp="$(mktemp -d)"
-    git clone https://github.com/luisbocanegra/kurve "$tmp/src"
+    git clone https://github.com/luisbocanegra/kurve.git "$tmp/src"
 
     cd "$tmp/src"
-
-    if kpackagetool6 -t Plasma/Applet -i . 2>/dev/null; then
-        ok "kurve installed"
-    else
-        kpackagetool6 -t Plasma/Applet -u .
-        ok "kurve updated"
-    fi
+    chmod +x install.sh
+    ./install.sh
 
     cd ~
     rm -rf "$tmp"
+    ok "kurve installed"
 }
 
 install_krohnkite() {
