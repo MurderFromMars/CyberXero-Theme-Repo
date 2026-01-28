@@ -93,11 +93,11 @@ build_panel_colorizer() {
 
     local tmp
     tmp="$(mktemp -d)"
-    git clone https://github.com/luisbocanegra/plasma-panel-colorizer "$tmp/src"
+    git clone "https://github.com/luisbocanegra/plasma-panel-colorizer" "$tmp/plasma-panel-colorizer"
 
-    cd "$tmp/src"
+    cd "$tmp/plasma-panel-colorizer"
     chmod +x install.sh
-    ./install.sh
+    ./install.sh || true
 
     cd ~
     rm -rf "$tmp"
@@ -108,10 +108,10 @@ build_kurve() {
     log "installing kurve…"
 
     local tmp
-    tmp="$(mktemp -d)"https://github.com/luisbocanegra/kurve
-    git clone https://github.com/luisbocanegra/kurve.git "$tmp/src"
+    tmp="$(mktemp -d)"
+    git clone "https://github.com/luisbocanegra/kurve.git" "$tmp/kurve"
 
-    cd "$tmp/src"
+    cd "$tmp/kurve"
     chmod +x install.sh
     ./install.sh || true
 
@@ -134,11 +134,11 @@ install_krohnkite() {
 
     local tmp
     tmp="$(mktemp -d)"
-    git clone https://codeberg.org/anametologin/Krohnkite "$tmp/src"
+    git clone "https://codeberg.org/anametologin/Krohnkite" "$tmp/krohnkite"
 
-    cd "$tmp/src"
+    cd "$tmp/krohnkite"
     chmod +x install.sh
-    ./install.sh
+    ./install.sh || true
 
     cd ~
     rm -rf "$tmp"
@@ -150,9 +150,9 @@ build_kde_rounded_corners() {
 
     local tmp
     tmp="$(mktemp -d)"
-    git clone https://github.com/matinlotfali/KDE-Rounded-Corners "$tmp/src"
+    git clone "https://github.com/matinlotfali/KDE-Rounded-Corners" "$tmp/kde-rounded-corners"
 
-    cd "$tmp/src"
+    cd "$tmp/kde-rounded-corners"
     mkdir build && cd build
     cmake ..
     cmake --build . -j"$(nproc)"
