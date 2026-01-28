@@ -299,9 +299,9 @@ apply_kde_theme_settings() {
 }
 
 main() {
-    printf "\n\033[1;35m┌──────────────────────────────────────────────┐\n"
-    printf   "│   CYBERXERO :: NEON SYSTEM DEPLOYMENT        │\n"
-    printf   "└──────────────────────────────────────────────┘\033[0m\n\n"
+    printf "\n\033[1;35m┌───────────────────────────────────────────────────────┐\n"
+    printf   "│  CYBERXERO DYNAMIC TILING THEME BY MURDERFROMMARS  │\n"
+    printf   "└───────────────────────────────────────────────────────┘\033[0m\n\n"
 
     fetch_repo
     detect_distro
