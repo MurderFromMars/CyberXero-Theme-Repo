@@ -3,7 +3,7 @@
 set -euo pipefail
 
 ########################################
-# CYBERXERO :: NEON SYSTEM INITIALIZER
+# CYBERXERO :: KDE TWM INITIALIZER
 ########################################
 
 REPO_DIR="$HOME/CyberXero-Theme-Repo"
@@ -30,18 +30,10 @@ fetch_repo() {
         git clone https://github.com/MurderFromMars/CyberXero-Theme-Repo "$REPO_DIR"
         ok "repository cloned"
     else
-        cd "$REPO_DIR"
-        git pull --rebase
-        cd ~
+        git -C "$REPO_DIR" pull --rebase
         ok "repository updated"
     fi
 }
-
-ensure_repo() {
-    [ -d "$REPO_DIR" ] || { err "repository missing"; exit 1; }
-}
-
-DISTRO="unknown"
 
 detect_distro() {
     log "scanning system architecture…"
@@ -58,29 +50,20 @@ detect_distro() {
     fi
 }
 
-install_arch_aur_pkg() {
-    local pkg="$1"
-
-    if command -v yay >/dev/null 2>&1; then
-        yay -S --needed --noconfirm "$pkg"
-        return
-    fi
-
-    if command -v paru >/dev/null 2>&1; then
-        paru -S --needed --noconfirm "$pkg"
-        return
-    fi
-
-    warn "AUR helper not found → $pkg skipped"
-}
-
 install_arch_dependencies() {
     log "installing arch dependencies…"
 
     sudo pacman -S --needed --noconfirm \
         git cmake extra-cmake-modules base-devel unzip
 
-    install_arch_aur_pkg qt5-tools
+    if command -v yay >/dev/null 2>&1; then
+        yay -S --needed --noconfirm qt5-tools
+    elif command -v paru >/dev/null 2>&1; then
+        paru -S --needed --noconfirm qt5-tools
+    else
+        warn "AUR helper not found → qt5-tools skipped"
+    fi
+
     ok "arch dependencies installed"
 }
 
@@ -121,21 +104,23 @@ build_panel_colorizer() {
 }
 
 build_kurve() {
-    log "compiling kurve…"
+    log "installing kurve plasmoid…"
 
     local tmp
     tmp="$(mktemp -d)"
     git clone https://github.com/luisbocanegra/kurve "$tmp/src"
 
     cd "$tmp/src"
-    mkdir build && cd build
-    cmake ..
-    cmake --build . -j"$(nproc)"
-    sudo make install
+
+    if kpackagetool6 -t Plasma/Applet -i . 2>/dev/null; then
+        ok "kurve installed"
+    else
+        kpackagetool6 -t Plasma/Applet -u .
+        ok "kurve updated"
+    fi
 
     cd ~
     rm -rf "$tmp"
-    ok "kurve installed"
 }
 
 install_krohnkite() {
@@ -346,7 +331,6 @@ main() {
     printf   "└──────────────────────────────────────────────┘\033[0m\n\n"
 
     fetch_repo
-    ensure_repo
     detect_distro
     install_dependencies
 
