@@ -1,153 +1,147 @@
 {
-"$schema": "https://github.com/fastfetch-cli/fastfetch/raw/dev/doc/json_schema.json",
-"logo": {
+  "$schema": "https://github.com/fastfetch-cli/fastfetch/raw/dev/doc/json_schema.json",
+  "logo": {
     "type": "kitty",
-    "source": "/home/murderfrommars/Pictures/cyberxero.png",
+    "source": "$HOME/Pictures/cyberxero.png",
     "width": 40,
     "height": 19,
-    "padding":{
-        "top": 3,
-        "left": 3,
-        "right": 3,
-        "bottom": 2
-        
+    "padding": {
+      "top": 3,
+      "left": 3,
+      "right": 3,
+      "bottom": 2
     }
-},
-    "display": {
-        "separator": "",
-        "constants": [
-            "──────────────" // {$1}, used in Custom module
-        ],
-        "key": {
-            "width": 10
-        }
+  },
+  "display": {
+    "separator": "",
+    "constants": [
+      "──────────────"
+    ],
+    "key": {
+      "width": 10
+    }
+  },
+  "modules": [
+    "break",
+    {
+      "type": "custom",
+      "format": "\u001b[31m┌────────────────────── SPECS ───────────────────────┐"
     },
-    "modules": [
-        "break",
-        {
-            "type": "custom",
-            "format": "\u001b[31m┌────────────────────── SPECS ───────────────────────┐"
-        },
-        {
-            "type": "host",
-            "key": "PC",
-            "keyColor": "35",
-            "format": "Asus ROG Strix G16CHR",
-            "outputColor": "37"
-        },
-        {
-            "type": "CPU",
-            "key": "CPU",
-            "showPeCoreCount": false,
-            "keyColor": "35",
-            "outputColor": "37"
-        },
-        {
-            "type": "gpu",
-            "key": "GPU",
-            "keyColor": "35",
-            "outputColor": "37"
-        },
-        {
-            "type": "memory",
-            "key": "MEMORY",
-            "keyColor": "35",
-            "outputColor":"37"
-        },
-        {
-            "type": "disk",
-            "key": "DISK",
-            "keyColor": "35",
-	    "format": "{1} / {2} ({3}) - {9}",
-	    "outputColor": "37"
-	},
-        {
-            "type": "custom",
-            "format": "\u001b[31m└────────────────────────────────────────────────────┘"
-        },
-        "break",
-        {
-            "type": "custom",
-            "format": "\u001b[31m┌──────────────────────── OS ────────────────────────┐"
-        },
-        {
-            "type": "os",
-            "key": "DISTRO",
-            "keyColor": "35",
-            "outputColor": "37"
-        },
-        {
-            "type": "kernel",
-            "key": "KERNEL",
-            "keyColor": "35",
-            "outputColor": "37"
-        },
-        {
-            "type": "gpu",
-            "key": "DRIVER",
-            "keyColor": "35",
-            "outputColor": "37",
-            "format": "{driver}"
-        },
-        {
-            "type": "packages",
-            "key": "PACKAGES",
-            "managers": ["pacman"],
-            "keyColor": "35",
-            "outputColor": "37"
-        },
-	{
-	    "type": "terminal",
-            "key": "TERMINAL",
-            "keyColor": "35",
-            "outputColor": "37"
-        },
-	{
-            "type": "shell",
-            "key": "SHELL",
-            "keyColor": "35",
-            "outputColor": "37"
-
-        },
-        {
-            "type": "custom",
-            "format": "\u001b[31m└────────────────────────────────────────────────────┘"
-        },
-        "break",
-        {
-            "type": "custom",
-            "format": "\u001b[31m┌────────────────────── DESKTOP ─────────────────────┐"
-        },
-        {
-            "type": "de",
-            "key": "DE",
-            "keyColor": "35",
-            "outputColor": "37"
-        },
-        {
-            "type": "wm",
-            "key": "WM",
-            "keyColor": "35",
-            "outputColor": "37"
-        },
-        {
-            "type": "wmtheme",
-            "key": "THEME",
-            "keyColor": "35",
-            "outputColor": "37"
-        },
-        {
-            "type": "custom",
-            "format": "\u001b[31m└────────────────────────────────────────────────────┘"
-            },
-         {
+    {
+      "type": "host",
+      "key": "PC",
+      "keyColor": "35",
+      "format": "Asus ROG Strix G16CHR",
+      "outputColor": "37"
+    },
+    {
+      "type": "CPU",
+      "key": "CPU",
+      "showPeCoreCount": false,
+      "keyColor": "35",
+      "outputColor": "37"
+    },
+    {
+      "type": "gpu",
+      "key": "GPU",
+      "keyColor": "35",
+      "outputColor": "37"
+    },
+    {
+      "type": "memory",
+      "key": "MEMORY",
+      "keyColor": "35",
+      "outputColor": "37"
+    },
+    {
+      "type": "disk",
+      "key": "DISK",
+      "keyColor": "35",
+      "format": "{1} / {2} ({3}) - {9}",
+      "outputColor": "37"
+    },
+    {
+      "type": "custom",
+      "format": "\u001b[31m└────────────────────────────────────────────────────┘"
+    },
+    "break",
+    {
+      "type": "custom",
+      "format": "\u001b[31m┌──────────────────────── OS ────────────────────────┐"
+    },
+    {
+      "type": "os",
+      "key": "DISTRO",
+      "keyColor": "35",
+      "outputColor": "37"
+    },
+    {
+      "type": "kernel",
+      "key": "KERNEL",
+      "keyColor": "35",
+      "outputColor": "37"
+    },
+    {
+      "type": "gpu",
+      "key": "DRIVER",
+      "keyColor": "35",
+      "outputColor": "37",
+      "format": "{driver}"
+    },
+    {
+      "type": "packages",
+      "key": "PACKAGES",
+      "managers": ["pacman"],
+      "keyColor": "35",
+      "outputColor": "37"
+    },
+    {
+      "type": "terminal",
+      "key": "TERMINAL",
+      "keyColor": "35",
+      "outputColor": "37"
+    },
+    {
+      "type": "shell",
+      "key": "SHELL",
+      "keyColor": "35",
+      "outputColor": "37"
+    },
+    {
+      "type": "custom",
+      "format": "\u001b[31m└────────────────────────────────────────────────────┘"
+    },
+    "break",
+    {
+      "type": "custom",
+      "format": "\u001b[31m┌────────────────────── DESKTOP ─────────────────────┐"
+    },
+    {
+      "type": "de",
+      "key": "DE",
+      "keyColor": "35",
+      "outputColor": "37"
+    },
+    {
+      "type": "wm",
+      "key": "WM",
+      "keyColor": "35",
+      "outputColor": "37"
+    },
+    {
+      "type": "wmtheme",
+      "key": "THEME",
+      "keyColor": "35",
+      "outputColor": "37"
+    },
+    {
+      "type": "custom",
+      "format": "\u001b[31m└────────────────────────────────────────────────────┘"
+    },
+    {
       "type": "colors",
-        "paddingLeft": 20,
-        "symbol": "circle",
-        },
-    ]
+      "paddingLeft": 20,
+      "symbol": "circle"
+    }
+  ]
 }
-
-
-
-
