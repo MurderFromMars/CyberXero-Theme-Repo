@@ -108,12 +108,12 @@ build_kurve() {
     log "installing kurve…"
 
     local tmp
-    tmp="$(mktemp -d)"
+    tmp="$(mktemp -d)"https://github.com/luisbocanegra/kurve
     git clone https://github.com/luisbocanegra/kurve.git "$tmp/src"
 
     cd "$tmp/src"
     chmod +x install.sh
-    ./install.sh
+    ./install.sh || true
 
     cd ~
     rm -rf "$tmp"
@@ -275,11 +275,7 @@ apply_kde_theme_settings() {
         echo "ColorScheme=CyberXero" >> "$cfg"
     fi
 
-    if ! grep -q "^
-
-\[Icons\]
-
-" "$cfg"; then
+    if ! grep -q "^[Icons]" "$cfg"; then
         {
             echo ""
             echo "[Icons]"
@@ -289,11 +285,7 @@ apply_kde_theme_settings() {
         if grep -q "^Theme=" "$cfg"; then
             sed -i "s/^Theme=.*/Theme=YAMIS/" "$cfg"
         else
-            sed -i "/^
-
-\[Icons\]
-
-/a Theme=YAMIS" "$cfg"
+            sed -i "/^[Icons]/a Theme=YAMIS" "$cfg"
         fi
     fi
 
