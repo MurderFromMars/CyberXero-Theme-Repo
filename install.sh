@@ -121,55 +121,39 @@ build_kurve() {
 }
 
 install_krohnkite() {
-    log "checking krohnkite…"
+    log "deploying krohnkite kwinscript…"
 
-    local dir="$HOME/.local/share/kwin/scripts/krohnkite"
+    local script="$REPO_DIR/krohnkite.kwinscript"
 
-    if [ -d "$dir" ]; then
-        ok "krohnkite already present"
+    if [ ! -f "$script" ]; then
+        warn "krohnkite.kwinscript missing in repo"
         return
     fi
 
-    log "installing krohnkite…"
-
-    local tmp
-    tmp="$(mktemp -d)"
-    
-    if git clone "https://codeberg.org/anametologin/Krohnkite" "$tmp/krohnkite"; then
-        cd "$tmp/krohnkite"
-        
-        # Use kpackagetool6 to install the KWin script
-        if command -v kpackagetool6 >/dev/null 2>&1; then
-            kpackagetool6 --type KWin/Script --install . || \
-            kpackagetool6 --type KWin/Script --upgrade .
-            cd ~
-            rm -rf "$tmp"
+    # Use kpackagetool6 to install the KWin script
+    if command -v kpackagetool6 >/dev/null 2>&1; then
+        # Try to install, if already installed, try to upgrade
+        if kpackagetool6 --type KWin/Script --install "$script" 2>/dev/null; then
             ok "krohnkite installed"
-            return
+        elif kpackagetool6 --type KWin/Script --upgrade "$script" 2>/dev/null; then
+            ok "krohnkite upgraded"
+        else
+            warn "krohnkite installation failed, trying manual method"
+            # Fallback to manual installation
+            local target="$HOME/.local/share/kwin/scripts/krohnkite"
+            rm -rf "$target"
+            mkdir -p "$target"
+            unzip -q "$script" -d "$target"
+            ok "krohnkite installed (manual) → $target"
         fi
-        
-        # Fallback: manual installation
-        log "using manual krohnkite installation method…"
-        mkdir -p "$dir"
-        
-        # Copy the package contents
-        if [ -d "contents" ]; then
-            cp -r contents "$dir/"
-        fi
-        if [ -f "metadata.json" ]; then
-            cp metadata.json "$dir/"
-        fi
-        if [ -f "metadata.desktop" ]; then
-            cp metadata.desktop "$dir/"
-        fi
-        
-        cd ~
-        rm -rf "$tmp"
-        ok "krohnkite installed (manual)"
     else
-        rm -rf "$tmp"
-        err "failed to clone krohnkite repository"
-        return 1
+        warn "kpackagetool6 not found, using manual installation"
+        # Manual installation
+        local target="$HOME/.local/share/kwin/scripts/krohnkite"
+        rm -rf "$target"
+        mkdir -p "$target"
+        unzip -q "$script" -d "$target"
+        ok "krohnkite installed (manual) → $target"
     fi
 }
 
@@ -361,7 +345,7 @@ apply_kde_theme_settings() {
 
 main() {
     printf "\n\033[1;35m┌───────────────────────────────────────────────────────┐\n"
-    printf   "│  CYBERXERO DYNAMIC TILING THEME BY MURDERFROMMARS  │\n"
+    printf   "│  CYBERXERO DYNAMIC TILING THEME BY MURDERFROMMARS  \n"
     printf   "└───────────────────────────────────────────────────────┘\033[0m\n\n"
 
     fetch_repo
@@ -370,15 +354,15 @@ main() {
 
     build_panel_colorizer
     build_kurve
-    install_krohnkite
     build_kde_rounded_corners
+    install_krohnkite
     install_kyanite
 
+    deploy_yamis_icons
+    deploy_color_scheme
     deploy_config_folders
     deploy_rc_files
     deploy_kwinrules
-    deploy_yamis_icons
-    deploy_color_scheme
     apply_kde_theme_settings
 
     printf "\n\033[1;32m[✔] CYBERXERO DEPLOYMENT COMPLETE\033[0m\n"
