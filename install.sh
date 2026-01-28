@@ -15,6 +15,18 @@ ok()   { printf "\033[1;32m[✔]\033[0m %s\n" "$1"; }
 warn() { printf "\033[1;33m[!]\033[0m %s\n" "$1"; }
 err()  { printf "\033[1;31m[✖]\033[0m %s\n" "$1" >&2; }
 
+section() {
+    printf "\n\033[1;35m╔═══════════════════════════════════════════════════════╗\033[0m\n"
+    printf "\033[1;35m║\033[0m  %-51s \033[1;35m║\033[0m\n" "$1"
+    printf "\033[1;35m╚═══════════════════════════════════════════════════════╝\033[0m\n\n"
+}
+
+subsection() {
+    printf "\n\033[1;36m┌─────────────────────────────────────────────────────┐\033[0m\n"
+    printf "\033[1;36m│\033[0m  %-50s \033[1;36m│\033[0m\n" "$1"
+    printf "\033[1;36m└─────────────────────────────────────────────────────┘\033[0m\n"
+}
+
 backup_file() {
     local target="$1"
     if [ -e "$target" ]; then
@@ -28,11 +40,18 @@ fetch_repo() {
     log "syncing CyberXero repository…"
 
     if [ ! -d "$REPO_DIR/.git" ]; then
-        git clone https://github.com/MurderFromMars/CyberXero-Theme-Repo "$REPO_DIR"
-        ok "repository cloned"
+        if git clone https://github.com/MurderFromMars/CyberXero-Theme-Repo "$REPO_DIR" 2>&1 | grep -v -E "^(remote:|Receiving|Resolving|Counting)" | grep -v "^$" || false; then
+            ok "repository cloned"
+        else
+            err "failed to clone repository"
+            exit 1
+        fi
     else
-        git -C "$REPO_DIR" pull --rebase
-        ok "repository updated"
+        if git -C "$REPO_DIR" pull --rebase >/dev/null 2>&1; then
+            ok "repository updated"
+        else
+            warn "failed to update repository (continuing with existing)"
+        fi
     fi
 }
 
@@ -56,12 +75,12 @@ install_arch_dependencies() {
 
     sudo pacman -S --needed --noconfirm \
         git cmake extra-cmake-modules base-devel unzip cava \
-        kitty fastfetch
+        kitty fastfetch >/dev/null 2>&1
 
     if command -v yay >/dev/null 2>&1; then
-        yay -S --needed --noconfirm qt5-tools
+        yay -S --needed --noconfirm qt5-tools >/dev/null 2>&1
     elif command -v paru >/dev/null 2>&1; then
-        paru -S --needed --noconfirm qt5-tools
+        paru -S --needed --noconfirm qt5-tools >/dev/null 2>&1
     else
         warn "AUR helper not found → qt5-tools skipped"
     fi
@@ -72,12 +91,12 @@ install_arch_dependencies() {
 install_debian_dependencies() {
     log "installing debian dependencies…"
 
-    sudo apt update
+    sudo apt update >/dev/null 2>&1
     sudo apt install -y \
         git cmake g++ extra-cmake-modules kwin-dev unzip \
         qt6-base-private-dev qt6-base-dev-tools \
         libkf6kcmutils-dev libdrm-dev libplasma-dev cava \
-        kitty fastfetch
+        kitty fastfetch >/dev/null 2>&1
 
     ok "debian dependencies installed"
 }
@@ -95,11 +114,11 @@ build_panel_colorizer() {
 
     local tmp
     tmp="$(mktemp -d)"
-    git clone "https://github.com/luisbocanegra/plasma-panel-colorizer" "$tmp/plasma-panel-colorizer"
+    git clone "https://github.com/luisbocanegra/plasma-panel-colorizer" "$tmp/plasma-panel-colorizer" 2>&1 | grep -v -E "^(remote:|Receiving|Resolving|Counting)" | grep -v "^$" || true
 
     cd "$tmp/plasma-panel-colorizer"
     chmod +x install.sh
-    ./install.sh || true
+    ./install.sh >/dev/null 2>&1 || true
 
     cd ~
     rm -rf "$tmp"
@@ -111,11 +130,11 @@ build_kurve() {
 
     local tmp
     tmp="$(mktemp -d)"
-    git clone "https://github.com/luisbocanegra/kurve.git" "$tmp/kurve"
+    git clone "https://github.com/luisbocanegra/kurve.git" "$tmp/kurve" 2>&1 | grep -v -E "^(remote:|Receiving|Resolving|Counting)" | grep -v "^$" || true
 
     cd "$tmp/kurve"
     chmod +x install.sh
-    ./install.sh || true
+    ./install.sh >/dev/null 2>&1 || true
 
     cd ~
     rm -rf "$tmp"
@@ -164,13 +183,13 @@ build_kde_rounded_corners() {
 
     local tmp
     tmp="$(mktemp -d)"
-    git clone "https://github.com/matinlotfali/KDE-Rounded-Corners" "$tmp/kde-rounded-corners"
+    git clone "https://github.com/matinlotfali/KDE-Rounded-Corners" "$tmp/kde-rounded-corners" 2>&1 | grep -v -E "^(remote:|Receiving|Resolving|Counting)" | grep -v "^$" || true
 
     cd "$tmp/kde-rounded-corners"
     mkdir build && cd build
-    cmake ..
-    cmake --build . -j"$(nproc)"
-    sudo make install
+    cmake .. >/dev/null 2>&1
+    cmake --build . -j"$(nproc)" 2>&1 | grep -E "Built target|^\[" || true
+    sudo make install >/dev/null 2>&1
 
     cd ~
     rm -rf "$tmp"
@@ -215,7 +234,7 @@ log "Building KDE Rounded Corners..."
 if mkdir build && cd build; then
     if cmake .. && cmake --build . -j"$(nproc)"; then
         log "Build successful"
-
+        
         log "Installing..."
         if make install; then
             log "Installation successful"
@@ -389,7 +408,7 @@ deploy_yamis_icons() {
     if [ -f "$yamis_zip" ]; then
         # Remove existing YAMIS installation if present
         [ -d "$yamis_dest/YAMIS" ] && rm -rf "$yamis_dest/YAMIS"
-
+        
         # Extract YAMIS icons
         unzip -q "$yamis_zip" -d "$yamis_dest"
         ok "icons → YAMIS"
@@ -409,7 +428,7 @@ deploy_modernclock() {
     if [ -d "$clock_source" ]; then
         # Remove existing installation if present
         [ -d "$clock_dest" ] && rm -rf "$clock_dest"
-
+        
         # Copy Modern Clock widget
         cp -r "$clock_source" "$clock_dest"
         ok "widget → Modern Clock"
@@ -511,8 +530,8 @@ apply_kde_theme_settings() {
     # Refresh KDE settings
     if command -v kquitapp6 >/dev/null 2>&1; then
         kquitapp6 plasmashell 2>/dev/null || true
-        sleep 1
-        kstart plasmashell 2>/dev/null & disown
+        sleep 2
+        nohup plasmashell >/dev/null 2>&1 &
         ok "plasmashell restarted"
     fi
 }
@@ -522,30 +541,44 @@ main() {
     printf   "│  CYBERXERO DYNAMIC TILING THEME BY MURDERFROMMARS  │\n"
     printf   "└───────────────────────────────────────────────────────┘\033[0m\n\n"
 
+    section "PHASE 1: SYSTEM PREPARATION"
     fetch_repo
     detect_distro
     install_dependencies
 
+    section "PHASE 2: BUILDING CORE COMPONENTS"
+    subsection "Window Manager Extensions"
     build_panel_colorizer
     build_kurve
     build_kde_rounded_corners
     setup_autorebuild_system
+    
+    subsection "KWin Scripts"
     install_krohnkite
     install_kyanite
 
+    section "PHASE 3: THEME DEPLOYMENT"
+    subsection "Visual Assets"
     deploy_yamis_icons
     deploy_modernclock
     deploy_color_scheme
     deploy_wallpapers
+    
+    subsection "Configuration Files"
     deploy_config_folders
     deploy_rc_files
     deploy_kwinrules
+    
+    subsection "Theme Activation"
     apply_wallpaper
     apply_kde_theme_settings
 
-    printf "\n\033[1;32m[✔] CYBERXERO DEPLOYMENT COMPLETE\033[0m\n"
-    printf "\033[1;36mbackup archive → $BACKUP_DIR\033[0m\n"
-    printf "\033[1;36mauto-rebuild logs → /var/log/kde-rounded-corners-rebuild.log\033[0m\n\n"
+    printf "\n\033[1;35m╔═══════════════════════════════════════════════════════╗\033[0m\n"
+    printf "\033[1;35m║\033[0m  \033[1;32mCYBERXERO DEPLOYMENT COMPLETE\033[0m                    \033[1;35m║\033[0m\n"
+    printf "\033[1;35m╚═══════════════════════════════════════════════════════╝\033[0m\n\n"
+    printf "\033[1;36m📦 Backup archive:\033[0m $BACKUP_DIR\n"
+    printf "\033[1;36m📋 Auto-rebuild logs:\033[0m /var/log/kde-rounded-corners-rebuild.log\n\n"
+    printf "\033[1;33m⚠️  Please log out and log back in for all changes to take effect.\033[0m\n\n"
 }
 
 main "$@"
