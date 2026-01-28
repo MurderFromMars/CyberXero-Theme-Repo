@@ -1,0 +1,59 @@
+[Common]
+OutlineIntensity=OutlineOff
+RoundedCorners=false
+
+[Windeco Exception 0]
+BorderSize=0
+Enabled=true
+ExceptionPattern=systemsettings
+ExceptionType=0
+HideTitleBar=true
+Mask=0
+
+[Windeco Exception 1]
+BorderSize=0
+Enabled=true
+ExceptionPattern=org.kde.dolphin
+ExceptionType=0
+HideTitleBar=true
+Mask=0
+
+[Windeco Exception 2]
+BorderSize=0
+Enabled=true
+ExceptionPattern=vesktop
+ExceptionType=0
+HideTitleBar=true
+Mask=0
+
+[Windeco Exception 3]
+BorderSize=0
+Enabled=true
+ExceptionPattern=kitty
+ExceptionType=0
+HideTitleBar=true
+Mask=0
+
+[Windeco Exception 4]
+BorderSize=0
+Enabled=true
+ExceptionPattern=org.kde.kate
+ExceptionType=0
+HideTitleBar=true
+Mask=0
+
+[Windeco Exception 5]
+BorderSize=0
+Enabled=true
+ExceptionPattern=org.qbittorrent.qBittorrent
+ExceptionType=0
+HideTitleBar=true
+Mask=0
+
+[Windeco Exception 6]
+BorderSize=0
+Enabled=true
+ExceptionPattern=org.kde.konsole
+ExceptionType=0
+HideTitleBar=true
+Mask=0
