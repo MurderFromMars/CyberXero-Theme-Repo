@@ -40,11 +40,18 @@ fetch_repo() {
     log "syncing CyberXero repository…"
 
     if [ ! -d "$REPO_DIR/.git" ]; then
-        git clone https://github.com/MurderFromMars/CyberXero-Theme-Repo "$REPO_DIR" 2>&1 | grep -v "^remote:" | grep -v "^Receiving" | grep -v "^Resolving" || true
-        ok "repository cloned"
+        if git clone https://github.com/MurderFromMars/CyberXero-Theme-Repo "$REPO_DIR" 2>&1 | grep -v -E "^(remote:|Receiving|Resolving|Counting)" | grep -v "^$" || false; then
+            ok "repository cloned"
+        else
+            err "failed to clone repository"
+            exit 1
+        fi
     else
-        git -C "$REPO_DIR" pull --rebase >/dev/null 2>&1
-        ok "repository updated"
+        if git -C "$REPO_DIR" pull --rebase >/dev/null 2>&1; then
+            ok "repository updated"
+        else
+            warn "failed to update repository (continuing with existing)"
+        fi
     fi
 }
 
@@ -107,7 +114,7 @@ build_panel_colorizer() {
 
     local tmp
     tmp="$(mktemp -d)"
-    git clone "https://github.com/luisbocanegra/plasma-panel-colorizer" "$tmp/plasma-panel-colorizer" 2>&1 | grep -v "^remote:" | grep -v "^Receiving" | grep -v "^Resolving" || true
+    git clone "https://github.com/luisbocanegra/plasma-panel-colorizer" "$tmp/plasma-panel-colorizer" 2>&1 | grep -v -E "^(remote:|Receiving|Resolving|Counting)" | grep -v "^$" || true
 
     cd "$tmp/plasma-panel-colorizer"
     chmod +x install.sh
@@ -123,7 +130,7 @@ build_kurve() {
 
     local tmp
     tmp="$(mktemp -d)"
-    git clone "https://github.com/luisbocanegra/kurve.git" "$tmp/kurve" 2>&1 | grep -v "^remote:" | grep -v "^Receiving" | grep -v "^Resolving" || true
+    git clone "https://github.com/luisbocanegra/kurve.git" "$tmp/kurve" 2>&1 | grep -v -E "^(remote:|Receiving|Resolving|Counting)" | grep -v "^$" || true
 
     cd "$tmp/kurve"
     chmod +x install.sh
@@ -176,7 +183,7 @@ build_kde_rounded_corners() {
 
     local tmp
     tmp="$(mktemp -d)"
-    git clone "https://github.com/matinlotfali/KDE-Rounded-Corners" "$tmp/kde-rounded-corners" 2>&1 | grep -v "^remote:" | grep -v "^Receiving" | grep -v "^Resolving" || true
+    git clone "https://github.com/matinlotfali/KDE-Rounded-Corners" "$tmp/kde-rounded-corners" 2>&1 | grep -v -E "^(remote:|Receiving|Resolving|Counting)" | grep -v "^$" || true
 
     cd "$tmp/kde-rounded-corners"
     mkdir build && cd build
@@ -376,22 +383,6 @@ deploy_rc_files() {
     done
 }
 
-remove_existing_panels() {
-    log "clearing existing panel configuration…"
-    
-    # Just remove the existing panel config file - don't kill plasmashell yet
-    # The restart at the end will pick up the new configuration
-    local plasma_config="$HOME/.config/plasma-org.kde.plasma.desktop-appletsrc"
-    
-    if [ -f "$plasma_config" ]; then
-        backup_file "$plasma_config"
-        rm -f "$plasma_config"
-        ok "existing panel config cleared"
-    else
-        ok "no existing panel config found"
-    fi
-}
-
 deploy_kwinrules() {
     log "deploying kwinrulesrc…"
 
@@ -539,8 +530,8 @@ apply_kde_theme_settings() {
     # Refresh KDE settings
     if command -v kquitapp6 >/dev/null 2>&1; then
         kquitapp6 plasmashell 2>/dev/null || true
-        sleep 1
-        kstart plasmashell 2>/dev/null & disown
+        sleep 2
+        nohup plasmashell >/dev/null 2>&1 &
         ok "plasmashell restarted"
     fi
 }
@@ -574,7 +565,6 @@ main() {
     deploy_wallpapers
     
     subsection "Configuration Files"
-    remove_existing_panels
     deploy_config_folders
     deploy_rc_files
     deploy_kwinrules
