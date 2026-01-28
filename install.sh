@@ -134,15 +134,43 @@ install_krohnkite() {
 
     local tmp
     tmp="$(mktemp -d)"
-    git clone "https://codeberg.org/anametologin/Krohnkite" "$tmp/krohnkite"
-
-    cd "$tmp/krohnkite"
-    chmod +x install.sh
-    ./install.sh || true
-
-    cd ~
-    rm -rf "$tmp"
-    ok "krohnkite installed"
+    
+    if git clone "https://codeberg.org/anametologin/Krohnkite" "$tmp/krohnkite"; then
+        cd "$tmp/krohnkite"
+        
+        # Use kpackagetool6 to install the KWin script
+        if command -v kpackagetool6 >/dev/null 2>&1; then
+            kpackagetool6 --type KWin/Script --install . || \
+            kpackagetool6 --type KWin/Script --upgrade .
+            cd ~
+            rm -rf "$tmp"
+            ok "krohnkite installed"
+            return
+        fi
+        
+        # Fallback: manual installation
+        log "using manual krohnkite installation method…"
+        mkdir -p "$dir"
+        
+        # Copy the package contents
+        if [ -d "contents" ]; then
+            cp -r contents "$dir/"
+        fi
+        if [ -f "metadata.json" ]; then
+            cp metadata.json "$dir/"
+        fi
+        if [ -f "metadata.desktop" ]; then
+            cp metadata.desktop "$dir/"
+        fi
+        
+        cd ~
+        rm -rf "$tmp"
+        ok "krohnkite installed (manual)"
+    else
+        rm -rf "$tmp"
+        err "failed to clone krohnkite repository"
+        return 1
+    fi
 }
 
 build_kde_rounded_corners() {
@@ -167,22 +195,37 @@ install_kyanite() {
     log "deploying kyanite kwinscript…"
 
     local script="$REPO_DIR/kyanite.kwinscript"
-    local target="$HOME/.local/share/kwin/scripts/kyanite"
 
     if [ ! -f "$script" ]; then
         warn "kyanite.kwinscript missing in repo"
         return
     fi
 
-    if [ -d "$target" ]; then
-        ok "kyanite already installed"
-        return
+    # Use kpackagetool6 to install the KWin script
+    if command -v kpackagetool6 >/dev/null 2>&1; then
+        # Try to install, if already installed, try to upgrade
+        if kpackagetool6 --type KWin/Script --install "$script" 2>/dev/null; then
+            ok "kyanite installed"
+        elif kpackagetool6 --type KWin/Script --upgrade "$script" 2>/dev/null; then
+            ok "kyanite upgraded"
+        else
+            warn "kyanite installation failed, trying manual method"
+            # Fallback to manual installation
+            local target="$HOME/.local/share/kwin/scripts/kyanite"
+            rm -rf "$target"
+            mkdir -p "$target"
+            unzip -q "$script" -d "$target"
+            ok "kyanite installed (manual) → $target"
+        fi
+    else
+        warn "kpackagetool6 not found, using manual installation"
+        # Manual installation
+        local target="$HOME/.local/share/kwin/scripts/kyanite"
+        rm -rf "$target"
+        mkdir -p "$target"
+        unzip -q "$script" -d "$target"
+        ok "kyanite installed (manual) → $target"
     fi
-
-    mkdir -p "$target"
-    unzip -q "$script" -d "$target"
-
-    ok "kyanite installed → $target"
 }
 
 deploy_config_folders() {
