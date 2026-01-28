@@ -376,6 +376,30 @@ deploy_rc_files() {
     done
 }
 
+remove_existing_panels() {
+    log "removing existing plasma panels…"
+    
+    # Kill plasmashell to ensure clean state
+    if command -v kquitapp6 >/dev/null 2>&1; then
+        kquitapp6 plasmashell 2>/dev/null || true
+        sleep 2
+    else
+        killall plasmashell 2>/dev/null || true
+        sleep 2
+    fi
+    
+    # Remove existing panel configurations
+    local plasma_config="$HOME/.config/plasma-org.kde.plasma.desktop-appletsrc"
+    
+    if [ -f "$plasma_config" ]; then
+        backup_file "$plasma_config"
+        rm -f "$plasma_config"
+        ok "existing panels removed"
+    else
+        ok "no existing panels found"
+    fi
+}
+
 deploy_kwinrules() {
     log "deploying kwinrulesrc…"
 
@@ -558,6 +582,7 @@ main() {
     deploy_wallpapers
     
     subsection "Configuration Files"
+    remove_existing_panels
     deploy_config_folders
     deploy_rc_files
     deploy_kwinrules
