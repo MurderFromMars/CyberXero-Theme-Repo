@@ -377,26 +377,18 @@ deploy_rc_files() {
 }
 
 remove_existing_panels() {
-    log "removing existing plasma panels…"
+    log "clearing existing panel configuration…"
     
-    # Kill plasmashell to ensure clean state
-    if command -v kquitapp6 >/dev/null 2>&1; then
-        kquitapp6 plasmashell 2>/dev/null || true
-        sleep 2
-    else
-        killall plasmashell 2>/dev/null || true
-        sleep 2
-    fi
-    
-    # Remove existing panel configurations
+    # Just remove the existing panel config file - don't kill plasmashell yet
+    # The restart at the end will pick up the new configuration
     local plasma_config="$HOME/.config/plasma-org.kde.plasma.desktop-appletsrc"
     
     if [ -f "$plasma_config" ]; then
         backup_file "$plasma_config"
         rm -f "$plasma_config"
-        ok "existing panels removed"
+        ok "existing panel config cleared"
     else
-        ok "no existing panels found"
+        ok "no existing panel config found"
     fi
 }
 
