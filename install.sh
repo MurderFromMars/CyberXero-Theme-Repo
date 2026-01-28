@@ -241,11 +241,19 @@ deploy_yamis_icons() {
 
     mkdir -p "$HOME/.local/share/icons"
 
-    if [ -d "$REPO_DIR/YAMIS" ]; then
-        cp -r "$REPO_DIR/YAMIS" "$HOME/.local/share/icons/"
+    local yamis_source="$REPO_DIR/YAMIS"
+    local yamis_dest="$HOME/.local/share/icons/YAMIS"
+
+    if [ -d "$yamis_source" ]; then
+        # Remove existing installation if present
+        [ -d "$yamis_dest" ] && rm -rf "$yamis_dest"
+        
+        # Copy YAMIS icons
+        cp -r "$yamis_source" "$yamis_dest"
         ok "icons → YAMIS"
     else
-        warn "YAMIS icon set missing"
+        warn "YAMIS folder not found at $yamis_source"
+        ls -la "$REPO_DIR" | head -20
     fi
 }
 
@@ -265,53 +273,29 @@ deploy_color_scheme() {
 apply_kde_theme_settings() {
     log "activating neon theme parameters…"
 
-    local cfg="$HOME/.config/kdeglobals"
-    backup_file "$cfg"
-    touch "$cfg"
-
-    if grep -q "^ColorScheme=" "$cfg"; then
-        sed -i "s/^ColorScheme=.*/ColorScheme=CyberXero/" "$cfg"
+    # Set color scheme using plasma-apply-colorscheme
+    if command -v plasma-apply-colorscheme >/dev/null 2>&1; then
+        plasma-apply-colorscheme CyberXero
+        ok "color scheme activated → CyberXero"
     else
-        echo "ColorScheme=CyberXero" >> "$cfg"
+        warn "plasma-apply-colorscheme not found"
     fi
 
-    if ! grep -q "^[Icons]" "$cfg"; then
-        {
-            echo ""
-            echo "[Icons]"
-            echo "Theme=YAMIS"
-        } >> "$cfg"
+    # Set icon theme using kwriteconfig6
+    if command -v kwriteconfig6 >/dev/null 2>&1; then
+        kwriteconfig6 --file kdeglobals --group Icons --key Theme "YAMIS"
+        ok "icon theme activated → YAMIS"
     else
-        if grep -q "^Theme=" "$cfg"; then
-            sed -i "s/^Theme=.*/Theme=YAMIS/" "$cfg"
-        else
-            sed -i "/^[Icons]/a Theme=YAMIS" "$cfg"
-        fi
+        warn "kwriteconfig6 not found"
     fi
 
-    ok "theme activated → CyberXero + YAMIS"
-}
-
-reload_plasmashell() {
-    log "reloading plasma shell…"
-
-    if command -v qdbus6 >/dev/null 2>&1; then
-        qdbus6 org.kde.plasmashell /PlasmaShell org.kde.PlasmaShell.quit || true
-    elif command -v qdbus >/dev/null 2>&1; then
-        qdbus org.kde.plasmashell /PlasmaShell org.kde.PlasmaShell.quit || true
-    else
-        pkill plasmashell || true
+    # Refresh KDE settings
+    if command -v kquitapp6 >/dev/null 2>&1; then
+        kquitapp6 plasmashell 2>/dev/null || true
+        sleep 1
+        kstart plasmashell 2>/dev/null & disown
+        ok "plasmashell restarted"
     fi
-
-    sleep 2
-
-    if command -v kstart5 >/dev/null 2>&1; then
-        kstart5 plasmashell >/dev/null 2>&1 & disown
-    else
-        plasmashell >/dev/null 2>&1 & disown
-    fi
-
-    ok "plasmashell restarted"
 }
 
 main() {
@@ -335,8 +319,6 @@ main() {
     deploy_yamis_icons
     deploy_color_scheme
     apply_kde_theme_settings
-
-    reload_plasmashell
 
     printf "\n\033[1;32m[✔] CYBERXERO DEPLOYMENT COMPLETE\033[0m\n"
     printf "\033[1;36mbackup archive → $BACKUP_DIR\033[0m\n\n"
