@@ -289,6 +289,24 @@ apply_kde_theme_settings() {
         warn "kwriteconfig6 not found"
     fi
 
+    # Enable Krohnkite KWin script
+    if command -v kwriteconfig6 >/dev/null 2>&1; then
+        kwriteconfig6 --file kwinrc --group Plugins --key krohnkiteEnabled true
+        ok "krohnkite enabled"
+    fi
+
+    # Enable Kyanite KWin script
+    if command -v kwriteconfig6 >/dev/null 2>&1; then
+        kwriteconfig6 --file kwinrc --group Plugins --key kyaniteEnabled true
+        ok "kyanite enabled"
+    fi
+
+    # Reconfigure KWin to apply script changes
+    if command -v qdbus6 >/dev/null 2>&1; then
+        qdbus6 org.kde.KWin /KWin reconfigure 2>/dev/null || true
+        ok "KWin reconfigured"
+    fi
+
     # Refresh KDE settings
     if command -v kquitapp6 >/dev/null 2>&1; then
         kquitapp6 plasmashell 2>/dev/null || true
