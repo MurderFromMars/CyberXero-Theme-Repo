@@ -175,6 +175,114 @@ build_kde_rounded_corners() {
     ok "rounded corners installed"
 }
 
+setup_autorebuild_system() {
+    log "configuring auto-rebuild for KDE Rounded Corners…"
+
+    # Create rebuild script
+    sudo tee /usr/local/bin/rebuild-kde-rounded-corners.sh > /dev/null <<'REBUILD_SCRIPT'
+#!/usr/bin/env bash
+set -euo pipefail
+
+LOG_FILE="/var/log/kde-rounded-corners-rebuild.log"
+
+log() {
+    echo "[$(date '+%Y-%m-%d %H:%M:%S')] $1" | tee -a "$LOG_FILE"
+}
+
+log "=== KDE Rounded Corners Rebuild Started ==="
+
+# Create temporary directory
+TMP_DIR="$(mktemp -d)"
+cd "$TMP_DIR"
+
+log "Cloning repository..."
+if git clone "https://github.com/matinlotfali/KDE-Rounded-Corners" kde-rounded-corners; then
+    log "Repository cloned successfully"
+else
+    log "ERROR: Failed to clone repository"
+    rm -rf "$TMP_DIR"
+    exit 1
+fi
+
+cd kde-rounded-corners
+
+log "Building KDE Rounded Corners..."
+if mkdir build && cd build; then
+    if cmake .. && cmake --build . -j"$(nproc)"; then
+        log "Build successful"
+        
+        log "Installing..."
+        if make install; then
+            log "Installation successful"
+        else
+            log "ERROR: Installation failed"
+            cd ~
+            rm -rf "$TMP_DIR"
+            exit 1
+        fi
+    else
+        log "ERROR: Build failed"
+        cd ~
+        rm -rf "$TMP_DIR"
+        exit 1
+    fi
+else
+    log "ERROR: Failed to create build directory"
+    cd ~
+    rm -rf "$TMP_DIR"
+    exit 1
+fi
+
+# Cleanup
+cd ~
+rm -rf "$TMP_DIR"
+
+log "=== KDE Rounded Corners Rebuild Completed Successfully ==="
+
+# Reconfigure KWin to load the updated effect
+if command -v qdbus6 >/dev/null 2>&1; then
+    qdbus6 org.kde.KWin /KWin reconfigure 2>/dev/null || true
+    log "KWin reconfigured"
+fi
+
+exit 0
+REBUILD_SCRIPT
+
+    sudo chmod +x /usr/local/bin/rebuild-kde-rounded-corners.sh
+    sudo touch /var/log/kde-rounded-corners-rebuild.log
+    sudo chmod 666 /var/log/kde-rounded-corners-rebuild.log
+
+    case "$DISTRO" in
+        arch)
+            log "installing pacman hook…"
+            sudo mkdir -p /etc/pacman.d/hooks
+            sudo tee /etc/pacman.d/hooks/kde-rounded-corners-rebuild.hook > /dev/null <<'HOOK'
+[Trigger]
+Operation = Install
+Operation = Upgrade
+Type = Package
+Target = kwin
+
+[Action]
+Description = Rebuilding KDE Rounded Corners after KWin update...
+When = PostTransaction
+Exec = /usr/local/bin/rebuild-kde-rounded-corners.sh
+Depends = kwin
+HOOK
+            ok "pacman hook installed → auto-rebuild enabled"
+            ;;
+        debian)
+            log "creating apt hook…"
+            sudo tee /etc/apt/apt.conf.d/99-kde-rounded-corners-rebuild > /dev/null <<'APTHOOK'
+DPkg::Post-Invoke {"if dpkg -l kwin-common 2>/dev/null | grep -q '^ii'; then /usr/local/bin/rebuild-kde-rounded-corners.sh; fi";};
+APTHOOK
+            ok "apt hook installed → auto-rebuild enabled"
+            ;;
+    esac
+
+    ok "auto-rebuild system configured"
+}
+
 install_kyanite() {
     log "deploying kyanite kwinscript…"
 
@@ -374,6 +482,7 @@ main() {
     build_panel_colorizer
     build_kurve
     build_kde_rounded_corners
+    setup_autorebuild_system
     install_krohnkite
     install_kyanite
 
@@ -386,7 +495,8 @@ main() {
     apply_kde_theme_settings
 
     printf "\n\033[1;32m[✔] CYBERXERO DEPLOYMENT COMPLETE\033[0m\n"
-    printf "\033[1;36mbackup archive → $BACKUP_DIR\033[0m\n\n"
+    printf "\033[1;36mbackup archive → $BACKUP_DIR\033[0m\n"
+    printf "\033[1;36mauto-rebuild logs → /var/log/kde-rounded-corners-rebuild.log\033[0m\n\n"
 }
 
 main "$@"
