@@ -55,7 +55,7 @@ install_arch_dependencies() {
     log "installing arch dependencies…"
 
     sudo pacman -S --needed --noconfirm \
-        git cmake extra-cmake-modules base-devel unzip
+        git cmake extra-cmake-modules base-devel unzip cava
 
     if command -v yay >/dev/null 2>&1; then
         yay -S --needed --noconfirm qt5-tools
@@ -75,7 +75,7 @@ install_debian_dependencies() {
     sudo apt install -y \
         git cmake g++ extra-cmake-modules kwin-dev unzip \
         qt6-base-private-dev qt6-base-dev-tools \
-        libkf6kcmutils-dev libdrm-dev libplasma-dev
+        libkf6kcmutils-dev libdrm-dev libplasma-dev cava
 
     ok "debian dependencies installed"
 }
@@ -215,7 +215,7 @@ install_kyanite() {
 deploy_config_folders() {
     log "deploying configuration modules…"
 
-    local folders=(btop kitty fastfetch)
+    local folders=(btop kitty fastfetch cava)
 
     for f in "${folders[@]}"; do
         if [ -d "$REPO_DIR/$f" ]; then
@@ -268,19 +268,38 @@ deploy_yamis_icons() {
 
     mkdir -p "$HOME/.local/share/icons"
 
-    local yamis_source="$REPO_DIR/YAMIS"
-    local yamis_dest="$HOME/.local/share/icons/YAMIS"
+    local yamis_zip="$REPO_DIR/YAMIS.zip"
+    local yamis_dest="$HOME/.local/share/icons"
 
-    if [ -d "$yamis_source" ]; then
-        # Remove existing installation if present
-        [ -d "$yamis_dest" ] && rm -rf "$yamis_dest"
+    if [ -f "$yamis_zip" ]; then
+        # Remove existing YAMIS installation if present
+        [ -d "$yamis_dest/YAMIS" ] && rm -rf "$yamis_dest/YAMIS"
         
-        # Copy YAMIS icons
-        cp -r "$yamis_source" "$yamis_dest"
+        # Extract YAMIS icons
+        unzip -q "$yamis_zip" -d "$yamis_dest"
         ok "icons → YAMIS"
     else
-        warn "YAMIS folder not found at $yamis_source"
-        ls -la "$REPO_DIR" | head -20
+        warn "YAMIS.zip not found at $yamis_zip"
+    fi
+}
+
+deploy_modernclock() {
+    log "installing Modern Clock widget…"
+
+    mkdir -p "$HOME/.local/share/plasma/plasmoids"
+
+    local clock_source="$REPO_DIR/com.github.prayag2.modernclock"
+    local clock_dest="$HOME/.local/share/plasma/plasmoids/com.github.prayag2.modernclock"
+
+    if [ -d "$clock_source" ]; then
+        # Remove existing installation if present
+        [ -d "$clock_dest" ] && rm -rf "$clock_dest"
+        
+        # Copy Modern Clock widget
+        cp -r "$clock_source" "$clock_dest"
+        ok "widget → Modern Clock"
+    else
+        warn "Modern Clock folder not found at $clock_source"
     fi
 }
 
@@ -345,7 +364,7 @@ apply_kde_theme_settings() {
 
 main() {
     printf "\n\033[1;35m┌───────────────────────────────────────────────────────┐\n"
-    printf   "│  CYBERXERO DYNAMIC TILING THEME BY MURDERFROMMARS  \n"
+    printf   "│  CYBERXERO DYNAMIC TILING THEME BY MURDERFROMMARS  │\n"
     printf   "└───────────────────────────────────────────────────────┘\033[0m\n\n"
 
     fetch_repo
@@ -359,6 +378,7 @@ main() {
     install_kyanite
 
     deploy_yamis_icons
+    deploy_modernclock
     deploy_color_scheme
     deploy_config_folders
     deploy_rc_files
