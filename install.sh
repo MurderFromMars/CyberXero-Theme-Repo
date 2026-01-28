@@ -471,25 +471,6 @@ deploy_wallpapers() {
     done
 }
 
-apply_wallpaper() {
-    log "setting active wallpaper…"
-
-    local wallpaper_path="$HOME/Pictures/cyberfield.jpg"
-
-    if [ ! -f "$wallpaper_path" ]; then
-        warn "cyberfield.jpg not found at $wallpaper_path"
-        return
-    fi
-
-    # Set wallpaper using plasma-apply-wallpaperimage
-    if command -v plasma-apply-wallpaperimage >/dev/null 2>&1; then
-        plasma-apply-wallpaperimage "$wallpaper_path"
-        ok "wallpaper activated → cyberfield.jpg"
-    else
-        warn "plasma-apply-wallpaperimage not found"
-    fi
-}
-
 apply_kde_theme_settings() {
     log "activating neon theme parameters…"
 
@@ -570,7 +551,6 @@ main() {
     deploy_kwinrules
     
     subsection "Theme Activation"
-    apply_wallpaper
     apply_kde_theme_settings
 
     printf "\n\033[1;35m╔═══════════════════════════════════════════════════════╗\033[0m\n"
