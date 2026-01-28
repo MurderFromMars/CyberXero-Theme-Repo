@@ -55,7 +55,8 @@ install_arch_dependencies() {
     log "installing arch dependencies…"
 
     sudo pacman -S --needed --noconfirm \
-        git cmake extra-cmake-modules base-devel unzip cava
+        git cmake extra-cmake-modules base-devel unzip cava \
+        kitty fastfetch
 
     if command -v yay >/dev/null 2>&1; then
         yay -S --needed --noconfirm qt5-tools
@@ -75,7 +76,8 @@ install_debian_dependencies() {
     sudo apt install -y \
         git cmake g++ extra-cmake-modules kwin-dev unzip \
         qt6-base-private-dev qt6-base-dev-tools \
-        libkf6kcmutils-dev libdrm-dev libplasma-dev cava
+        libkf6kcmutils-dev libdrm-dev libplasma-dev cava \
+        kitty fastfetch
 
     ok "debian dependencies installed"
 }
@@ -344,6 +346,8 @@ deploy_rc_files() {
         kwinrc
         plasmarc
         plasma-org.kde.plasma.desktop-appletsrc
+        breezerc
+        kglobalshortcutsrc
     )
 
     for rc in "${rc_files[@]}"; do
@@ -424,6 +428,46 @@ deploy_color_scheme() {
     fi
 }
 
+deploy_wallpapers() {
+    log "deploying wallpapers…"
+
+    mkdir -p "$HOME/Pictures"
+
+    local images=(
+        cyberfield.jpg
+        cyberxero.png
+        cyberxero2.png
+    )
+
+    for img in "${images[@]}"; do
+        if [ -f "$REPO_DIR/$img" ]; then
+            cp "$REPO_DIR/$img" "$HOME/Pictures/"
+            ok "wallpaper → $img"
+        else
+            warn "missing → $img"
+        fi
+    done
+}
+
+apply_wallpaper() {
+    log "setting active wallpaper…"
+
+    local wallpaper_path="$HOME/Pictures/cyberfield.jpg"
+
+    if [ ! -f "$wallpaper_path" ]; then
+        warn "cyberfield.jpg not found at $wallpaper_path"
+        return
+    fi
+
+    # Set wallpaper using plasma-apply-wallpaperimage
+    if command -v plasma-apply-wallpaperimage >/dev/null 2>&1; then
+        plasma-apply-wallpaperimage "$wallpaper_path"
+        ok "wallpaper activated → cyberfield.jpg"
+    else
+        warn "plasma-apply-wallpaperimage not found"
+    fi
+}
+
 apply_kde_theme_settings() {
     log "activating neon theme parameters…"
 
@@ -489,9 +533,11 @@ main() {
     deploy_yamis_icons
     deploy_modernclock
     deploy_color_scheme
+    deploy_wallpapers
     deploy_config_folders
     deploy_rc_files
     deploy_kwinrules
+    apply_wallpaper
     apply_kde_theme_settings
 
     printf "\n\033[1;32m[✔] CYBERXERO DEPLOYMENT COMPLETE\033[0m\n"
