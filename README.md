@@ -18,7 +18,7 @@ All configuration changes are backed up automatically before being applied.
 Run the following command from any shell. The script will execute using Bash.
 
 ```
-curl -fsSL https://raw.githubusercontent.com/MurderFromMars/CyberXero-Theme-Repo/main/cyberxero.sh | bash
+curl -fsSL https://raw.githubusercontent.com/MurderFromMars/CyberXero-Theme-Repo/main/install.sh | bash
 ```
 
 ---
