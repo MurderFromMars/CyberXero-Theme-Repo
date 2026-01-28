@@ -180,6 +180,9 @@ build_kde_rounded_corners() {
 setup_autorebuild_system() {
     log "configuring auto-rebuild for KDE Rounded Corners…"
 
+    # Ensure the directory exists
+    sudo mkdir -p /usr/local/bin
+
     # Create rebuild script
     sudo tee /usr/local/bin/rebuild-kde-rounded-corners.sh > /dev/null <<'REBUILD_SCRIPT'
 #!/usr/bin/env bash
