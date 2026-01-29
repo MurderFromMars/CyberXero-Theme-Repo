@@ -88,8 +88,8 @@ CyberXero includes a bundled copy of Krohnkite with configuration tuned for the 
 
 ### Visual and UI Components
 
-plasma-panel-colorizer for dynamic panel coloring  
-kurve for UI motion and animation polish  
+plasma-panel-colorizer for deep panel customization
+kurve for cava powered audio visualizers integrated into the panel
 KDE Rounded Corners for true rounded window edges and themed window shadows  
 
 ---
