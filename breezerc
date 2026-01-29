@@ -57,3 +57,355 @@ ExceptionPattern=org.kde.konsole
 ExceptionType=0
 HideTitleBar=true
 Mask=0
+
+[Windeco Exception 7]
+BorderSize=0
+Enabled=true
+ExceptionPattern=org.kde.gwenview
+ExceptionType=0
+HideTitleBar=true
+Mask=0
+
+[Windeco Exception 8]
+BorderSize=0
+Enabled=true
+ExceptionPattern=org.kde.okular
+ExceptionType=0
+HideTitleBar=true
+Mask=0
+
+[Windeco Exception 9]
+BorderSize=0
+Enabled=true
+ExceptionPattern=org.kde.spectacle
+ExceptionType=0
+HideTitleBar=true
+Mask=0
+
+[Windeco Exception 10]
+BorderSize=0
+Enabled=true
+ExceptionPattern=org.kde.ark
+ExceptionType=0
+HideTitleBar=true
+Mask=0
+
+[Windeco Exception 11]
+BorderSize=0
+Enabled=true
+ExceptionPattern=org.kde.elisa
+ExceptionType=0
+HideTitleBar=true
+Mask=0
+
+[Windeco Exception 12]
+BorderSize=0
+Enabled=true
+ExceptionPattern=org.kde.haruna
+ExceptionType=0
+HideTitleBar=true
+Mask=0
+
+[Windeco Exception 13]
+BorderSize=0
+Enabled=true
+ExceptionPattern=org.kde.discover
+ExceptionType=0
+HideTitleBar=true
+Mask=0
+
+[Windeco Exception 14]
+BorderSize=0
+Enabled=true
+ExceptionPattern=org.kde.partitionmanager
+ExceptionType=0
+HideTitleBar=true
+Mask=0
+
+[Windeco Exception 15]
+BorderSize=0
+Enabled=true
+ExceptionPattern=org.kde.kwrite
+ExceptionType=0
+HideTitleBar=true
+Mask=0
+
+[Windeco Exception 16]
+BorderSize=0
+Enabled=true
+ExceptionPattern=org.kde.kcalc
+ExceptionType=0
+HideTitleBar=true
+Mask=0
+
+[Windeco Exception 17]
+BorderSize=0
+Enabled=true
+ExceptionPattern=org.kde.filelight
+ExceptionType=0
+HideTitleBar=true
+Mask=0
+
+[Windeco Exception 18]
+BorderSize=0
+Enabled=true
+ExceptionPattern=org.kde.plasma-systemmonitor
+ExceptionType=0
+HideTitleBar=true
+Mask=0
+
+[Windeco Exception 19]
+BorderSize=0
+Enabled=true
+ExceptionPattern=org.kde.kdeconnect.app
+ExceptionType=0
+HideTitleBar=true
+Mask=0
+
+[Windeco Exception 20]
+BorderSize=0
+Enabled=true
+ExceptionPattern=org.kde.krita
+ExceptionType=0
+HideTitleBar=true
+Mask=0
+
+[Windeco Exception 21]
+BorderSize=0
+Enabled=true
+ExceptionPattern=org.kde.kdenlive
+ExceptionType=0
+HideTitleBar=true
+Mask=0
+
+[Windeco Exception 22]
+BorderSize=0
+Enabled=true
+ExceptionPattern=org.kde.kwalletmanager5
+ExceptionType=0
+HideTitleBar=true
+Mask=0
+
+[Windeco Exception 23]
+BorderSize=0
+Enabled=true
+ExceptionPattern=org.kde.kinfocenter
+ExceptionType=0
+HideTitleBar=true
+Mask=0
+
+[Windeco Exception 24]
+BorderSize=0
+Enabled=true
+ExceptionPattern=org.kde.kruler
+ExceptionType=0
+HideTitleBar=true
+Mask=0
+
+[Windeco Exception 25]
+BorderSize=0
+Enabled=true
+ExceptionPattern=org.kde.kcolorchooser
+ExceptionType=0
+HideTitleBar=true
+Mask=0
+
+[Windeco Exception 26]
+BorderSize=0
+Enabled=true
+ExceptionPattern=org.telegram.desktop
+ExceptionType=0
+HideTitleBar=true
+Mask=0
+
+[Windeco Exception 27]
+BorderSize=0
+Enabled=true
+ExceptionPattern=org.keepassxc.KeePassXC
+ExceptionType=0
+HideTitleBar=true
+Mask=0
+
+[Windeco Exception 28]
+BorderSize=0
+Enabled=true
+ExceptionPattern=vlc
+ExceptionType=0
+HideTitleBar=true
+Mask=0
+
+[Windeco Exception 29]
+BorderSize=0
+Enabled=true
+ExceptionPattern=com.obsproject.Studio
+ExceptionType=0
+HideTitleBar=true
+Mask=0
+
+[Windeco Exception 30]
+BorderSize=0
+Enabled=true
+ExceptionPattern=org.strawberrymusicplayer.strawberry
+ExceptionType=0
+HideTitleBar=true
+Mask=0
+
+[Windeco Exception 31]
+BorderSize=0
+Enabled=true
+ExceptionPattern=com.calibre_ebook.calibre
+ExceptionType=0
+HideTitleBar=true
+Mask=0
+
+[Windeco Exception 32]
+BorderSize=0
+Enabled=true
+ExceptionPattern=virtualbox
+ExceptionType=0
+HideTitleBar=true
+Mask=0
+
+[Windeco Exception 33]
+BorderSize=0
+Enabled=true
+ExceptionPattern=org.flameshot.Flameshot
+ExceptionType=0
+HideTitleBar=true
+Mask=0
+
+[Windeco Exception 34]
+BorderSize=0
+Enabled=true
+ExceptionPattern=mpv
+ExceptionType=0
+HideTitleBar=true
+Mask=0
+
+[Windeco Exception 35]
+BorderSize=0
+Enabled=true
+ExceptionPattern=smplayer
+ExceptionType=0
+HideTitleBar=true
+Mask=0
+
+[Windeco Exception 36]
+BorderSize=0
+Enabled=true
+ExceptionPattern=org.mozilla.Thunderbird
+ExceptionType=0
+HideTitleBar=true
+Mask=0
+
+[Windeco Exception 37]
+BorderSize=0
+Enabled=true
+ExceptionPattern=org.kde.kontact
+ExceptionType=0
+HideTitleBar=true
+Mask=0
+
+[Windeco Exception 38]
+BorderSize=0
+Enabled=true
+ExceptionPattern=org.kde.akregator
+ExceptionType=0
+HideTitleBar=true
+Mask=0
+
+[Windeco Exception 39]
+BorderSize=0
+Enabled=true
+ExceptionPattern=org.kde.kompare
+ExceptionType=0
+HideTitleBar=true
+Mask=0
+
+[Windeco Exception 40]
+BorderSize=0
+Enabled=true
+ExceptionPattern=org.kde.kolourpaint
+ExceptionType=0
+HideTitleBar=true
+Mask=0
+
+[Windeco Exception 41]
+BorderSize=0
+Enabled=true
+ExceptionPattern=org.kde.skanlite
+ExceptionType=0
+HideTitleBar=true
+Mask=0
+
+[Windeco Exception 42]
+BorderSize=0
+Enabled=true
+ExceptionPattern=org.kde.kamoso
+ExceptionType=0
+HideTitleBar=true
+Mask=0
+
+[Windeco Exception 43]
+BorderSize=0
+Enabled=true
+ExceptionPattern=org.kde.ktimer
+ExceptionType=0
+HideTitleBar=true
+Mask=0
+
+[Windeco Exception 44]
+BorderSize=0
+Enabled=true
+ExceptionPattern=org.kde.sweeper
+ExceptionType=0
+HideTitleBar=true
+Mask=0
+
+[Windeco Exception 45]
+BorderSize=0
+Enabled=true
+ExceptionPattern=org.kde.isoimagewriter
+ExceptionType=0
+HideTitleBar=true
+Mask=0
+
+[Windeco Exception 46]
+BorderSize=0
+Enabled=true
+ExceptionPattern=org.kde.kid3
+ExceptionType=0
+HideTitleBar=true
+Mask=0
+
+[Windeco Exception 47]
+BorderSize=0
+Enabled=true
+ExceptionPattern=org.kde.yakuake
+ExceptionType=0
+HideTitleBar=true
+Mask=0
+
+[Windeco Exception 48]
+BorderSize=0
+Enabled=true
+ExceptionPattern=prusaslicer
+ExceptionType=0
+HideTitleBar=true
+Mask=0
+
+[Windeco Exception 49]
+BorderSize=0
+Enabled=true
+ExceptionPattern=org.freecadweb.FreeCAD
+ExceptionType=0
+HideTitleBar=true
+Mask=0
+
+[Windeco Exception 50]
+BorderSize=0
+Enabled=true
+ExceptionPattern=org.shotcut.Shotcut
+ExceptionType=0
+HideTitleBar=true
+Mask=0
