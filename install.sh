@@ -36,9 +36,43 @@ backup_file() {
     fi
 }
 
+stop_plasmashell() {
+    if pgrep -x "plasmashell" > /dev/null; then
+        log "stopping plasmashell to prevent config conflicts..."
+        kquitapp6 plasmashell 2>/dev/null || killall plasmashell 2>/dev/null || true
+        sleep 2
+        ok "plasmashell stopped"
+    fi
+}
+
+start_plasmashell() {
+    if ! pgrep -x "plasmashell" > /dev/null; then
+        log "restarting plasmashell..."
+        nohup plasmashell >/dev/null 2>&1 &
+        sleep 3
+        ok "plasmashell restarted"
+    fi
+}
+
+purge_old_panels_live() {
+    log "purging existing panels from live session..."
+    
+    if ! command -v qdbus6 >/dev/null 2>&1; then
+        warn "qdbus6 not found, skipping live panel purge"
+        return
+    fi
+    
+    # Remove all panels directly using panels() API
+    qdbus6 org.kde.plasmashell /PlasmaShell org.kde.PlasmaShell.evaluateScript "
+        const allPanels = panels();
+        for (let i = allPanels.length - 1; i >= 0; i--) {
+            allPanels[i].remove();
+        }
+    " 2>/dev/null && ok "panels removed from live session" || warn "panel removal failed"
+}
+
 fetch_repo() {
     log "syncing CyberXero repository…"
-
     if [ ! -d "$REPO_DIR/.git" ]; then
         if git clone https://github.com/MurderFromMars/CyberXero "$REPO_DIR" 2>&1 | grep -v -E "^(remote:|Receiving|Resolving|Counting)" | grep -v "^$" || false; then
             ok "repository cloned"
@@ -57,7 +91,6 @@ fetch_repo() {
 
 detect_distro() {
     log "scanning system architecture…"
-
     if command -v pacman >/dev/null 2>&1; then
         DISTRO="arch"
         ok "arch‑based system detected"
@@ -72,7 +105,6 @@ detect_distro() {
 
 install_arch_dependencies() {
     log "installing arch dependencies…"
-
     sudo pacman -S --needed --noconfirm \
         git cmake extra-cmake-modules base-devel unzip cava \
         kitty fastfetch >/dev/null 2>&1
@@ -84,20 +116,17 @@ install_arch_dependencies() {
     else
         warn "AUR helper not found → qt5-tools skipped"
     fi
-
     ok "arch dependencies installed"
 }
 
 install_debian_dependencies() {
     log "installing debian dependencies…"
-
     sudo apt update >/dev/null 2>&1
     sudo apt install -y \
         git cmake g++ extra-cmake-modules kwin-dev unzip \
         qt6-base-private-dev qt6-base-dev-tools \
         libkf6kcmutils-dev libdrm-dev libplasma-dev cava \
         kitty fastfetch >/dev/null 2>&1
-
     ok "debian dependencies installed"
 }
 
@@ -111,15 +140,12 @@ install_dependencies() {
 
 build_panel_colorizer() {
     log "compiling plasma‑panel‑colorizer…"
-
     local tmp
     tmp="$(mktemp -d)"
     git clone "https://github.com/luisbocanegra/plasma-panel-colorizer" "$tmp/plasma-panel-colorizer" 2>&1 | grep -v -E "^(remote:|Receiving|Resolving|Counting)" | grep -v "^$" || true
-
     cd "$tmp/plasma-panel-colorizer"
     chmod +x install.sh
     ./install.sh >/dev/null 2>&1 || true
-
     cd ~
     rm -rf "$tmp"
     ok "panel colorizer installed"
@@ -127,15 +153,12 @@ build_panel_colorizer() {
 
 build_kurve() {
     log "installing kurve…"
-
     local tmp
     tmp="$(mktemp -d)"
     git clone "https://github.com/luisbocanegra/kurve.git" "$tmp/kurve" 2>&1 | grep -v -E "^(remote:|Receiving|Resolving|Counting)" | grep -v "^$" || true
-
     cd "$tmp/kurve"
     chmod +x install.sh
     ./install.sh >/dev/null 2>&1 || true
-
     cd ~
     rm -rf "$tmp"
     ok "kurve installed"
@@ -143,24 +166,18 @@ build_kurve() {
 
 install_krohnkite() {
     log "deploying krohnkite kwinscript…"
-
     local script="$REPO_DIR/krohnkite.kwinscript"
-
     if [ ! -f "$script" ]; then
         warn "krohnkite.kwinscript missing in repo"
         return
     fi
-
-    # Use kpackagetool6 to install the KWin script
     if command -v kpackagetool6 >/dev/null 2>&1; then
-        # Try to install, if already installed, try to upgrade
         if kpackagetool6 --type KWin/Script --install "$script" 2>/dev/null; then
             ok "krohnkite installed"
         elif kpackagetool6 --type KWin/Script --upgrade "$script" 2>/dev/null; then
             ok "krohnkite upgraded"
         else
-            warn "krohnkite installation failed, trying manual method"
-            # Fallback to manual installation
+            warn "kpackagetool6 failed, using manual installation"
             local target="$HOME/.local/share/kwin/scripts/krohnkite"
             rm -rf "$target"
             mkdir -p "$target"
@@ -169,7 +186,6 @@ install_krohnkite() {
         fi
     else
         warn "kpackagetool6 not found, using manual installation"
-        # Manual installation
         local target="$HOME/.local/share/kwin/scripts/krohnkite"
         rm -rf "$target"
         mkdir -p "$target"
@@ -180,17 +196,14 @@ install_krohnkite() {
 
 build_kde_rounded_corners() {
     log "compiling kde‑rounded‑corners…"
-
     local tmp
     tmp="$(mktemp -d)"
     git clone "https://github.com/matinlotfali/KDE-Rounded-Corners" "$tmp/kde-rounded-corners" 2>&1 | grep -v -E "^(remote:|Receiving|Resolving|Counting)" | grep -v "^$" || true
-
     cd "$tmp/kde-rounded-corners"
     mkdir build && cd build
     cmake .. >/dev/null 2>&1
     cmake --build . -j"$(nproc)" 2>&1 | grep -E "Built target|^\[" || true
     sudo make install >/dev/null 2>&1
-
     cd ~
     rm -rf "$tmp"
     ok "rounded corners installed"
@@ -198,15 +211,10 @@ build_kde_rounded_corners() {
 
 setup_autorebuild_system() {
     log "configuring auto-rebuild for KDE Rounded Corners…"
-
-    # Ensure the directory exists
     sudo mkdir -p /usr/local/bin
-
-    # Create rebuild script
     sudo tee /usr/local/bin/rebuild-kde-rounded-corners.sh > /dev/null <<'REBUILD_SCRIPT'
 #!/usr/bin/env bash
 set -euo pipefail
-
 LOG_FILE="/var/log/kde-rounded-corners-rebuild.log"
 
 log() {
@@ -215,7 +223,6 @@ log() {
 
 log "=== KDE Rounded Corners Rebuild Started ==="
 
-# Create temporary directory
 TMP_DIR="$(mktemp -d)"
 cd "$TMP_DIR"
 
@@ -298,7 +305,6 @@ HOOK
         debian)
             log "creating apt hook…"
             
-            # Create a wrapper script that checks if kwin was actually updated
             sudo tee /usr/local/bin/check-and-rebuild-kde-rounded-corners.sh > /dev/null <<'CHECKSCRIPT'
 #!/usr/bin/env bash
 # Only rebuild if kwin packages were updated in the current dpkg run
@@ -320,24 +326,18 @@ APTHOOK
 
 install_kyanite() {
     log "deploying kyanite kwinscript…"
-
     local script="$REPO_DIR/kyanite.kwinscript"
-
     if [ ! -f "$script" ]; then
         warn "kyanite.kwinscript missing in repo"
         return
     fi
-
-    # Use kpackagetool6 to install the KWin script
     if command -v kpackagetool6 >/dev/null 2>&1; then
-        # Try to install, if already installed, try to upgrade
         if kpackagetool6 --type KWin/Script --install "$script" 2>/dev/null; then
             ok "kyanite installed"
         elif kpackagetool6 --type KWin/Script --upgrade "$script" 2>/dev/null; then
             ok "kyanite upgraded"
         else
-            warn "kyanite installation failed, trying manual method"
-            # Fallback to manual installation
+            warn "kpackagetool6 failed, using manual installation"
             local target="$HOME/.local/share/kwin/scripts/kyanite"
             rm -rf "$target"
             mkdir -p "$target"
@@ -346,7 +346,6 @@ install_kyanite() {
         fi
     else
         warn "kpackagetool6 not found, using manual installation"
-        # Manual installation
         local target="$HOME/.local/share/kwin/scripts/kyanite"
         rm -rf "$target"
         mkdir -p "$target"
@@ -357,9 +356,7 @@ install_kyanite() {
 
 deploy_config_folders() {
     log "deploying configuration modules…"
-
     local folders=(btop kitty fastfetch cava)
-
     for f in "${folders[@]}"; do
         if [ -d "$REPO_DIR/$f" ]; then
             backup_file "$HOME/.config/$f"
@@ -374,14 +371,12 @@ deploy_config_folders() {
 
 deploy_rc_files() {
     log "deploying plasma rc files…"
-
     local rc_files=(
         kwinrc
         plasmarc
         plasma-org.kde.plasma.desktop-appletsrc
         breezerc
     )
-
     for rc in "${rc_files[@]}"; do
         if [ -f "$REPO_DIR/$rc" ]; then
             backup_file "$HOME/.config/$rc"
@@ -395,9 +390,7 @@ deploy_rc_files() {
 
 deploy_kwinrules() {
     log "deploying kwinrulesrc…"
-
     local file="kwinrulesrc"
-
     if [ -f "$REPO_DIR/$file" ]; then
         backup_file "$HOME/.config/$file"
         cp "$REPO_DIR/$file" "$HOME/.config/$file"
@@ -409,17 +402,11 @@ deploy_kwinrules() {
 
 deploy_yamis_icons() {
     log "installing YAMIS icon theme…"
-
     mkdir -p "$HOME/.local/share/icons"
-
     local yamis_zip="$REPO_DIR/YAMIS.zip"
     local yamis_dest="$HOME/.local/share/icons"
-
     if [ -f "$yamis_zip" ]; then
-        # Remove existing YAMIS installation if present
         [ -d "$yamis_dest/YAMIS" ] && rm -rf "$yamis_dest/YAMIS"
-        
-        # Extract YAMIS icons
         unzip -q "$yamis_zip" -d "$yamis_dest"
         ok "icons → YAMIS"
     else
@@ -429,17 +416,11 @@ deploy_yamis_icons() {
 
 deploy_modernclock() {
     log "installing Modern Clock widget…"
-
     mkdir -p "$HOME/.local/share/plasma/plasmoids"
-
     local clock_source="$REPO_DIR/com.github.prayag2.modernclock"
     local clock_dest="$HOME/.local/share/plasma/plasmoids/com.github.prayag2.modernclock"
-
     if [ -d "$clock_source" ]; then
-        # Remove existing installation if present
         [ -d "$clock_dest" ] && rm -rf "$clock_dest"
-        
-        # Copy Modern Clock widget
         cp -r "$clock_source" "$clock_dest"
         ok "widget → Modern Clock"
     else
@@ -449,9 +430,7 @@ deploy_modernclock() {
 
 deploy_color_scheme() {
     log "installing CyberXero color scheme…"
-
     mkdir -p "$HOME/.local/share/color-schemes"
-
     if [ -f "$REPO_DIR/CyberXero.colors" ]; then
         cp "$REPO_DIR/CyberXero.colors" "$HOME/.local/share/color-schemes/"
         ok "colors → CyberXero"
@@ -462,27 +441,22 @@ deploy_color_scheme() {
 
 deploy_wallpapers() {
     log "deploying wallpapers…"
-
-    # Ensure system icons directory exists
     sudo mkdir -p /usr/local/share/icons
-
-    # Deploy main wallpaper to system location
+    
     if [ -f "$REPO_DIR/cyberfield.jpg" ]; then
         sudo cp "$REPO_DIR/cyberfield.jpg" /usr/local/share/icons/
         ok "wallpaper → cyberfield.jpg → /usr/local/share/icons"
     else
         warn "missing → cyberfield.jpg"
     fi
-
-    # Deploy logo to system location
+    
     if [ -f "$REPO_DIR/cyberxero2.png" ]; then
         sudo cp "$REPO_DIR/cyberxero2.png" /usr/local/share/icons/
         ok "icon → cyberxero2.png → /usr/local/share/icons"
     else
         warn "missing → cyberxero2.png"
     fi
-
-    # Keep cyberxero.png in Pictures for user access
+    
     mkdir -p "$HOME/Pictures"
     if [ -f "$REPO_DIR/cyberxero.png" ]; then
         cp "$REPO_DIR/cyberxero.png" "$HOME/Pictures/"
@@ -494,94 +468,23 @@ deploy_wallpapers() {
 
 set_active_wallpaper() {
     log "setting active wallpaper → cyberfield.jpg…"
-
     local wallpaper="/usr/local/share/icons/cyberfield.jpg"
-    local plasma_config="$HOME/.config/plasma-org.kde.plasma.desktop-appletsrc"
-
-    # Verify the wallpaper file exists
+    
     if [ ! -f "$wallpaper" ]; then
         warn "wallpaper file not found: $wallpaper"
         return 1
     fi
-
-    local config_success=false
-    local live_success=false
-
-    # =========================================================================
-    # STEP 1: Modify the config file directly (THIS is what persists on reboot)
-    # Using plain path without file:// prefix for better compatibility
-    # =========================================================================
     
-    if [ -f "$plasma_config" ]; then
-        # Find all desktop containments (plugin=org.kde.plasma.folder or org.kde.desktopcontainment)
-        # These are the containments that have wallpapers
-        local desktop_containments
-        desktop_containments=$(awk '
-            /^\[Containments\]\[[0-9]+\]$/ { 
-                gsub(/[^0-9]/, "", $0)
-                current_id = $0
-            }
-            /^plugin=org\.kde\.(plasma\.folder|desktopcontainment)/ {
-                print current_id
-            }
-        ' "$plasma_config" 2>/dev/null | sort -u)
-
-        if [ -n "$desktop_containments" ]; then
-            log "found desktop containments: $desktop_containments"
-            
-            for cid in $desktop_containments; do
-                # Use kwriteconfig6 if available (cleaner)
-                if command -v kwriteconfig6 >/dev/null 2>&1; then
-                    kwriteconfig6 --file plasma-org.kde.plasma.desktop-appletsrc \
-                        --group "Containments" --group "$cid" --group "Wallpaper" \
-                        --group "org.kde.image" --group "General" \
-                        --key "Image" "$wallpaper" 2>/dev/null
-                    
-                    # Also set WallpaperPlugin to ensure org.kde.image is active
-                    kwriteconfig6 --file plasma-org.kde.plasma.desktop-appletsrc \
-                        --group "Containments" --group "$cid" \
-                        --key "wallpaperplugin" "org.kde.image" 2>/dev/null
-                    
-                    ok "config updated for containment $cid"
-                    config_success=true
-                fi
-            done
-        fi
-
-        # Fallback: if no desktop containments found or kwriteconfig6 unavailable,
-        # use awk to update ALL wallpaper sections in the file
-        if [ "$config_success" = false ]; then
-            log "using awk fallback for config modification…"
-            
-            awk -v wp="$wallpaper" '
-                /^\[Containments\]\[[0-9]+\]\[Wallpaper\]\[org\.kde\.image\]\[General\]/ { in_section=1 }
-                /^\[/ && !/^\[Containments\]\[[0-9]+\]\[Wallpaper\]\[org\.kde\.image\]\[General\]/ { in_section=0 }
-                in_section && /^Image=/ { $0="Image=" wp }
-                { print }
-            ' "$plasma_config" > "$plasma_config.tmp" && mv "$plasma_config.tmp" "$plasma_config"
-            
-            ok "config updated via awk"
-            config_success=true
-        fi
-    else
-        warn "plasma config not found: $plasma_config"
-    fi
-
-    # =========================================================================
-    # STEP 2: Apply live (optional, for immediate visual feedback)
-    # This alone does NOT persist — Step 1 is what matters for reboot
-    # =========================================================================
-
     # Try plasma-apply-wallpaperimage (Plasma 6)
     if command -v plasma-apply-wallpaperimage >/dev/null 2>&1; then
         if plasma-apply-wallpaperimage "$wallpaper" 2>/dev/null; then
-            ok "wallpaper applied live via plasma-apply-wallpaperimage"
-            live_success=true
+            ok "wallpaper applied via plasma-apply-wallpaperimage"
+            return 0
         fi
     fi
-
-    # Try qdbus6 if plasma-apply didn't work
-    if [ "$live_success" = false ] && command -v qdbus6 >/dev/null 2>&1; then
+    
+    # Fallback: Use qdbus6
+    if command -v qdbus6 >/dev/null 2>&1; then
         local script="
             const allDesktops = desktops();
             for (const desktop of allDesktops) {
@@ -591,34 +494,21 @@ set_active_wallpaper() {
             }
         "
         if qdbus6 org.kde.plasmashell /PlasmaShell org.kde.PlasmaShell.evaluateScript "$script" 2>/dev/null; then
-            ok "wallpaper applied live via qdbus6"
-            live_success=true
+            ok "wallpaper applied via qdbus6"
+            return 0
         fi
     fi
-
-    # =========================================================================
-    # STEP 3: Report results
-    # =========================================================================
-
-    if [ "$config_success" = true ]; then
-        ok "wallpaper will persist after reboot"
-        return 0
-    else
-        warn "could not modify config file — wallpaper may not persist after reboot"
-        warn "please set wallpaper manually in System Settings → Wallpaper"
-        return 1
-    fi
+    
+    warn "could not apply wallpaper - please set manually after reboot"
+    return 1
 }
 
 apply_breeze_decoration() {
     log "configuring Breeze window decoration…"
-
     if command -v kwriteconfig6 >/dev/null 2>&1; then
-        # Get current decoration theme
         local current_decoration
         current_decoration=$(kreadconfig6 --file kwinrc --group org.kde.kdecoration2 --key library 2>/dev/null || echo "")
-
-        # Only change if not already set to Breeze
+        
         if [ "$current_decoration" != "org.kde.breeze" ]; then
             kwriteconfig6 --file kwinrc --group org.kde.kdecoration2 --key library "org.kde.breeze"
             kwriteconfig6 --file kwinrc --group org.kde.kdecoration2 --key theme "Breeze"
@@ -633,7 +523,7 @@ apply_breeze_decoration() {
 
 apply_kde_theme_settings() {
     log "activating neon theme parameters…"
-
+    
     # Set color scheme using plasma-apply-colorscheme
     if command -v plasma-apply-colorscheme >/dev/null 2>&1; then
         plasma-apply-colorscheme CyberXero 2>/dev/null || true
@@ -641,34 +531,25 @@ apply_kde_theme_settings() {
     else
         warn "plasma-apply-colorscheme not found"
     fi
-
-    # Set icon theme using kwriteconfig6
+    
+    # Set icon theme and enable KWin scripts
     if command -v kwriteconfig6 >/dev/null 2>&1; then
         kwriteconfig6 --file kdeglobals --group Icons --key Theme "YAMIS"
         ok "icon theme activated → YAMIS"
+        
+        kwriteconfig6 --file kwinrc --group Plugins --key krohnkiteEnabled true
+        ok "krohnkite enabled"
+        
+        kwriteconfig6 --file kwinrc --group Plugins --key kyaniteEnabled true
+        ok "kyanite enabled"
     else
         warn "kwriteconfig6 not found"
     fi
-
-    # Enable Krohnkite KWin script
-    if command -v kwriteconfig6 >/dev/null 2>&1; then
-        kwriteconfig6 --file kwinrc --group Plugins --key krohnkiteEnabled true
-        ok "krohnkite enabled"
-    fi
-
-    # Enable Kyanite KWin script
-    if command -v kwriteconfig6 >/dev/null 2>&1; then
-        kwriteconfig6 --file kwinrc --group Plugins --key kyaniteEnabled true
-        ok "kyanite enabled"
-    fi
-
+    
     # Set Breeze window decoration
     apply_breeze_decoration
-
-    # Set the active wallpaper
-    set_active_wallpaper
-
-    # Reconfigure KWin to apply script changes (safe operation)
+    
+    # Reconfigure KWin to apply script changes
     if command -v qdbus6 >/dev/null 2>&1; then
         qdbus6 org.kde.KWin /KWin reconfigure 2>/dev/null || true
         ok "KWin reconfigured"
@@ -697,6 +578,14 @@ main() {
     install_kyanite
 
     section "PHASE 3: THEME DEPLOYMENT"
+    
+    subsection "Panel Cleanup"
+    # Remove old panels from LIVE session first
+    purge_old_panels_live
+    
+    # THEN stop plasmashell (so it doesn't save the old config)
+    stop_plasmashell
+    
     subsection "Visual Assets"
     deploy_yamis_icons
     deploy_modernclock
@@ -710,6 +599,12 @@ main() {
     
     subsection "Theme Activation"
     apply_kde_theme_settings
+    
+    # Restart plasmashell with new config
+    start_plasmashell
+    
+    # Set wallpaper AFTER plasmashell is running
+    set_active_wallpaper
 
     printf "\n\033[1;35m╔═══════════════════════════════════════════════════════╗\033[0m\n"
     printf "\033[1;35m║\033[0m  \033[1;32mCYBERXERO DEPLOYMENT COMPLETE\033[0m                    \033[1;35m║\033[0m\n"
