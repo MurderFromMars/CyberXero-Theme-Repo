@@ -23,6 +23,23 @@ curl -fsSL https://raw.githubusercontent.com/MurderFromMars/CyberXero/main/insta
 
 ---
 
+## Third Party Credits
+
+CyberXero integrates several excellent community projects. Full credit and thanks go to the original authors.
+
+| Project | Author | Description |
+|---------|--------|-------------|
+| [Krohnkite](https://github.com/anametologin/krohnkite) | anametologin | Dynamic tiling window management for KWin |
+| [plasma-panel-colorizer](https://github.com/luisbocanegra/plasma-panel-colorizer) | luisbocanegra | Dynamic panel theming and colorization |
+| [kurve](https://github.com/luisbocanegra/kurve) | luisbocanegra | UI motion and animation enhancements |
+| [KDE-Rounded-Corners](https://github.com/matinlotfali/KDE-Rounded-Corners) | matinlotfali | Rounded corners and window shadows for KWin |
+| [Modern Clock](https://github.com/prayag2/modern-clock) | prayag2 | Minimal clock widget for Plasma |
+| [YAMIS](https://github.com/xenlism/Yami) | xenlism | Icon theme |
+
+These projects are installed or built automatically during CyberXero deployment. They retain their original licenses.
+
+---
+
 ## Design Goals
 
 CyberXero is built around three core ideas.
@@ -65,13 +82,15 @@ Dynamic Tiling Window Manager
 
 Krohnkite provides automatic tiling for application windows within each workspace. It handles window placement and layout while deferring workspace lifecycle entirely to Kyanite.
 
+CyberXero includes a bundled copy of Krohnkite with configuration tuned for the theme. Users on lower resolution monitors may need to adjust gap settings in **System Settings → Window Management → KWin Scripts → Krohnkite** to achieve the desired spacing between tiled windows.
+
 ---
 
 ### Visual and UI Components
 
 plasma-panel-colorizer for dynamic panel coloring  
 kurve for UI motion and animation polish  
-KDE Rounded Corners for true rounded window edges  
+KDE Rounded Corners for true rounded window edges and themed window shadows  
 
 ---
 
@@ -138,6 +157,7 @@ The following directories are deployed to ~/.config.
 kitty  
 btop  
 fastfetch  
+cava
 
 Existing directories are backed up before replacement.
 
@@ -151,6 +171,7 @@ kwinrc
 plasmarc  
 plasma-org.kde.plasma.desktop-appletsrc  
 kwinrulesrc  
+breezerc
 
 ---
 
@@ -197,25 +218,42 @@ Manual restoration is always possible by copying files back from this directory.
 Clone the repository.
 
 ```
-git clone https://github.com/MurderFromMars/CyberXero-Theme-Repo
-cd CyberXero-Theme-Repo
+git clone https://github.com/MurderFromMars/CyberXero
+cd CyberXero
 ```
 
 Make the script executable and run it.
 
 ```
-chmod +x cyberxero.sh
-./cyberxero.sh
+chmod +x install.sh
+./install.sh
 ```
 
 Root privileges are required for dependency installation.
 
 ---
 
-## Post Installation Notes
+## Post Installation
+
+### Required: Configure Keybindings
+
+CyberXero does not install custom keybindings. You must configure these manually after installation.
+
+Open **System Settings → Shortcuts** to configure global shortcuts.
+
+For Krohnkite tiling controls, navigate to **System Settings → Window Management → KWin Scripts → Krohnkite** and configure keybindings there.
+
+Recommended bindings to configure:
+
+- Window focus navigation (up, down, left, right)
+- Window movement between tiles
+- Layout cycling
+- Workspace switching
+- Window to workspace movement
+
+### Additional Notes
 
 Some effects may require a full logout and login to behave correctly.  
-Krohnkite keybindings can be adjusted in System Settings under Window Management.  
 Workspace behavior is entirely controlled by Kyanite and does not require manual configuration.
 
 ---
