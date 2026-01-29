@@ -297,10 +297,21 @@ HOOK
             ;;
         debian)
             log "creating apt hook…"
+            
+            # Create a wrapper script that checks if kwin was actually updated
+            sudo tee /usr/local/bin/check-and-rebuild-kde-rounded-corners.sh > /dev/null <<'CHECKSCRIPT'
+#!/usr/bin/env bash
+# Only rebuild if kwin packages were updated in the current dpkg run
+if tail -20 /var/log/dpkg.log 2>/dev/null | grep -qE " (upgrade|configure) kwin"; then
+    /usr/local/bin/rebuild-kde-rounded-corners.sh
+fi
+CHECKSCRIPT
+            sudo chmod +x /usr/local/bin/check-and-rebuild-kde-rounded-corners.sh
+
             sudo tee /etc/apt/apt.conf.d/99-kde-rounded-corners-rebuild > /dev/null <<'APTHOOK'
-DPkg::Post-Invoke {"if dpkg -l kwin-common 2>/dev/null | grep -q '^ii'; then /usr/local/bin/rebuild-kde-rounded-corners.sh; fi";};
+DPkg::Post-Invoke { "/usr/local/bin/check-and-rebuild-kde-rounded-corners.sh"; };
 APTHOOK
-            ok "apt hook installed → auto-rebuild enabled"
+            ok "apt hook installed → auto-rebuild on kwin updates"
             ;;
     esac
 
