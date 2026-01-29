@@ -610,6 +610,27 @@ set_active_wallpaper() {
     fi
 }
 
+apply_breeze_decoration() {
+    log "configuring Breeze window decoration…"
+
+    if command -v kwriteconfig6 >/dev/null 2>&1; then
+        # Get current decoration theme
+        local current_decoration
+        current_decoration=$(kreadconfig6 --file kwinrc --group org.kde.kdecoration2 --key library 2>/dev/null || echo "")
+
+        # Only change if not already set to Breeze
+        if [ "$current_decoration" != "org.kde.breeze" ]; then
+            kwriteconfig6 --file kwinrc --group org.kde.kdecoration2 --key library "org.kde.breeze"
+            kwriteconfig6 --file kwinrc --group org.kde.kdecoration2 --key theme "Breeze"
+            ok "decoration → Breeze (changed from ${current_decoration:-none})"
+        else
+            ok "decoration → Breeze (already active)"
+        fi
+    else
+        warn "kwriteconfig6 not found, cannot set decoration"
+    fi
+}
+
 apply_kde_theme_settings() {
     log "activating neon theme parameters…"
 
@@ -640,6 +661,9 @@ apply_kde_theme_settings() {
         kwriteconfig6 --file kwinrc --group Plugins --key kyaniteEnabled true
         ok "kyanite enabled"
     fi
+
+    # Set Breeze window decoration
+    apply_breeze_decoration
 
     # Set the active wallpaper
     set_active_wallpaper
