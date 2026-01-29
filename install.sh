@@ -463,36 +463,39 @@ deploy_color_scheme() {
 deploy_wallpapers() {
     log "deploying wallpapers…"
 
-    mkdir -p "$HOME/Pictures"
+    # Ensure system icons directory exists
+    sudo mkdir -p /usr/local/share/icons
 
-    local images=(
-        cyberfield.jpg
-        cyberxero.png
-    )
+    # Deploy main wallpaper to system location
+    if [ -f "$REPO_DIR/cyberfield.jpg" ]; then
+        sudo cp "$REPO_DIR/cyberfield.jpg" /usr/local/share/icons/
+        ok "wallpaper → cyberfield.jpg → /usr/local/share/icons"
+    else
+        warn "missing → cyberfield.jpg"
+    fi
 
-    for img in "${images[@]}"; do
-        if [ -f "$REPO_DIR/$img" ]; then
-            cp "$REPO_DIR/$img" "$HOME/Pictures/"
-            ok "wallpaper → $img"
-        else
-            warn "missing → $img"
-        fi
-    done
-
-    # Deploy cyberxero2.png to system icons directory
+    # Deploy logo to system location
     if [ -f "$REPO_DIR/cyberxero2.png" ]; then
-        sudo mkdir -p /usr/local/share/icons
         sudo cp "$REPO_DIR/cyberxero2.png" /usr/local/share/icons/
         ok "icon → cyberxero2.png → /usr/local/share/icons"
     else
         warn "missing → cyberxero2.png"
+    fi
+
+    # Keep cyberxero.png in Pictures for user access
+    mkdir -p "$HOME/Pictures"
+    if [ -f "$REPO_DIR/cyberxero.png" ]; then
+        cp "$REPO_DIR/cyberxero.png" "$HOME/Pictures/"
+        ok "wallpaper → cyberxero.png → ~/Pictures"
+    else
+        warn "missing → cyberxero.png"
     fi
 }
 
 set_active_wallpaper() {
     log "setting active wallpaper → cyberfield.jpg…"
 
-    local wallpaper="$HOME/Pictures/cyberfield.jpg"
+    local wallpaper="/usr/local/share/icons/cyberfield.jpg"
     local plasma_config="$HOME/.config/plasma-org.kde.plasma.desktop-appletsrc"
 
     # Verify the wallpaper file exists
@@ -506,6 +509,7 @@ set_active_wallpaper() {
 
     # =========================================================================
     # STEP 1: Modify the config file directly (THIS is what persists on reboot)
+    # Using plain path without file:// prefix for better compatibility
     # =========================================================================
     
     if [ -f "$plasma_config" ]; then
@@ -531,7 +535,7 @@ set_active_wallpaper() {
                     kwriteconfig6 --file plasma-org.kde.plasma.desktop-appletsrc \
                         --group "Containments" --group "$cid" --group "Wallpaper" \
                         --group "org.kde.image" --group "General" \
-                        --key "Image" "file://$wallpaper" 2>/dev/null
+                        --key "Image" "$wallpaper" 2>/dev/null
                     
                     # Also set WallpaperPlugin to ensure org.kde.image is active
                     kwriteconfig6 --file plasma-org.kde.plasma.desktop-appletsrc \
@@ -549,7 +553,7 @@ set_active_wallpaper() {
         if [ "$config_success" = false ]; then
             log "using awk fallback for config modification…"
             
-            awk -v wp="file://$wallpaper" '
+            awk -v wp="$wallpaper" '
                 /^\[Containments\]\[[0-9]+\]\[Wallpaper\]\[org\.kde\.image\]\[General\]/ { in_section=1 }
                 /^\[/ && !/^\[Containments\]\[[0-9]+\]\[Wallpaper\]\[org\.kde\.image\]\[General\]/ { in_section=0 }
                 in_section && /^Image=/ { $0="Image=" wp }
@@ -583,7 +587,7 @@ set_active_wallpaper() {
             for (const desktop of allDesktops) {
                 desktop.wallpaperPlugin = 'org.kde.image';
                 desktop.currentConfigGroup = ['Wallpaper', 'org.kde.image', 'General'];
-                desktop.writeConfig('Image', 'file://$wallpaper');
+                desktop.writeConfig('Image', '$wallpaper');
             }
         "
         if qdbus6 org.kde.plasmashell /PlasmaShell org.kde.PlasmaShell.evaluateScript "$script" 2>/dev/null; then
