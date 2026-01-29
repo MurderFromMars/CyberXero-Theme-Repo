@@ -364,6 +364,17 @@ deploy_config_folders() {
 deploy_rc_files() {
     log "deploying plasma rc files…"
 
+    # kglobalaccel holds shortcuts in memory and writes on exit — stop it first
+    if command -v kquitapp6 >/dev/null 2>&1; then
+        kquitapp6 kglobalaccel 2>/dev/null || true
+        sleep 1
+        log "stopped kglobalaccel daemon"
+    elif command -v kquitapp5 >/dev/null 2>&1; then
+        kquitapp5 kglobalaccel 2>/dev/null || true
+        sleep 1
+        log "stopped kglobalaccel daemon"
+    fi
+
     local rc_files=(
         kwinrc
         plasmarc
@@ -381,6 +392,15 @@ deploy_rc_files() {
             warn "missing → $rc"
         fi
     done
+
+    # Restart kglobalaccel so it reads the new config
+    if command -v kstart6 >/dev/null 2>&1; then
+        kstart6 --service kglobalaccel 2>/dev/null || true
+        log "restarted kglobalaccel daemon"
+    elif command -v kstart5 >/dev/null 2>&1; then
+        kstart5 --service kglobalaccel 2>/dev/null || true
+        log "restarted kglobalaccel daemon"
+    fi
 }
 
 deploy_kwinrules() {
@@ -475,6 +495,7 @@ set_active_wallpaper() {
     log "setting active wallpaper → cyberfield.jpg…"
 
     local wallpaper="$HOME/Pictures/cyberfield.jpg"
+    local plasma_config="$HOME/.config/plasma-org.kde.plasma.desktop-appletsrc"
 
     # Verify the wallpaper file exists
     if [ ! -f "$wallpaper" ]; then
@@ -482,18 +503,83 @@ set_active_wallpaper() {
         return 1
     fi
 
-    local success=false
+    local config_success=false
+    local live_success=false
 
-    # Method 1: plasma-apply-wallpaperimage (Plasma 6 preferred method)
+    # =========================================================================
+    # STEP 1: Modify the config file directly (THIS is what persists on reboot)
+    # =========================================================================
+    
+    if [ -f "$plasma_config" ]; then
+        # Find all desktop containments (plugin=org.kde.plasma.folder or org.kde.desktopcontainment)
+        # These are the containments that have wallpapers
+        local desktop_containments
+        desktop_containments=$(awk '
+            /^\[Containments\]\[[0-9]+\]$/ { 
+                gsub(/[^0-9]/, "", $0)
+                current_id = $0
+            }
+            /^plugin=org\.kde\.(plasma\.folder|desktopcontainment)/ {
+                print current_id
+            }
+        ' "$plasma_config" 2>/dev/null | sort -u)
+
+        if [ -n "$desktop_containments" ]; then
+            log "found desktop containments: $desktop_containments"
+            
+            for cid in $desktop_containments; do
+                # Use kwriteconfig6 if available (cleaner)
+                if command -v kwriteconfig6 >/dev/null 2>&1; then
+                    kwriteconfig6 --file plasma-org.kde.plasma.desktop-appletsrc \
+                        --group "Containments" --group "$cid" --group "Wallpaper" \
+                        --group "org.kde.image" --group "General" \
+                        --key "Image" "file://$wallpaper" 2>/dev/null
+                    
+                    # Also set WallpaperPlugin to ensure org.kde.image is active
+                    kwriteconfig6 --file plasma-org.kde.plasma.desktop-appletsrc \
+                        --group "Containments" --group "$cid" \
+                        --key "wallpaperplugin" "org.kde.image" 2>/dev/null
+                    
+                    ok "config updated for containment $cid"
+                    config_success=true
+                fi
+            done
+        fi
+
+        # Fallback: if no desktop containments found or kwriteconfig6 unavailable,
+        # use awk to update ALL wallpaper sections in the file
+        if [ "$config_success" = false ]; then
+            log "using awk fallback for config modification…"
+            
+            awk -v wp="file://$wallpaper" '
+                /^\[Containments\]\[[0-9]+\]\[Wallpaper\]\[org\.kde\.image\]\[General\]/ { in_section=1 }
+                /^\[/ && !/^\[Containments\]\[[0-9]+\]\[Wallpaper\]\[org\.kde\.image\]\[General\]/ { in_section=0 }
+                in_section && /^Image=/ { $0="Image=" wp }
+                { print }
+            ' "$plasma_config" > "$plasma_config.tmp" && mv "$plasma_config.tmp" "$plasma_config"
+            
+            ok "config updated via awk"
+            config_success=true
+        fi
+    else
+        warn "plasma config not found: $plasma_config"
+    fi
+
+    # =========================================================================
+    # STEP 2: Apply live (optional, for immediate visual feedback)
+    # This alone does NOT persist — Step 1 is what matters for reboot
+    # =========================================================================
+
+    # Try plasma-apply-wallpaperimage (Plasma 6)
     if command -v plasma-apply-wallpaperimage >/dev/null 2>&1; then
         if plasma-apply-wallpaperimage "$wallpaper" 2>/dev/null; then
-            ok "wallpaper set via plasma-apply-wallpaperimage"
-            success=true
+            ok "wallpaper applied live via plasma-apply-wallpaperimage"
+            live_success=true
         fi
     fi
 
-    # Method 2: qdbus6 with Plasma Shell scripting (covers all monitors)
-    if [ "$success" = false ] && command -v qdbus6 >/dev/null 2>&1; then
+    # Try qdbus6 if plasma-apply didn't work
+    if [ "$live_success" = false ] && command -v qdbus6 >/dev/null 2>&1; then
         local script="
             const allDesktops = desktops();
             for (const desktop of allDesktops) {
@@ -503,87 +589,23 @@ set_active_wallpaper() {
             }
         "
         if qdbus6 org.kde.plasmashell /PlasmaShell org.kde.PlasmaShell.evaluateScript "$script" 2>/dev/null; then
-            ok "wallpaper set via qdbus6"
-            success=true
+            ok "wallpaper applied live via qdbus6"
+            live_success=true
         fi
     fi
 
-    # Method 3: qdbus (Plasma 5 fallback)
-    if [ "$success" = false ] && command -v qdbus >/dev/null 2>&1; then
-        local script="
-            var allDesktops = desktops();
-            for (var i = 0; i < allDesktops.length; i++) {
-                var d = allDesktops[i];
-                d.wallpaperPlugin = 'org.kde.image';
-                d.currentConfigGroup = ['Wallpaper', 'org.kde.image', 'General'];
-                d.writeConfig('Image', 'file://$wallpaper');
-            }
-        "
-        if qdbus org.kde.plasmashell /PlasmaShell org.kde.PlasmaShell.evaluateScript "$script" 2>/dev/null; then
-            ok "wallpaper set via qdbus (Plasma 5)"
-            success=true
-        fi
-    fi
+    # =========================================================================
+    # STEP 3: Report results
+    # =========================================================================
 
-    # Method 4: Direct config file modification (deferred until logout)
-    if [ "$success" = false ]; then
-        local plasma_config="$HOME/.config/plasma-org.kde.plasma.desktop-appletsrc"
-        if [ -f "$plasma_config" ]; then
-            # Backup before modification
-            backup_file "$plasma_config"
-            
-            # Update all Image= entries under org.kde.image wallpaper sections
-            if grep -q "org.kde.image" "$plasma_config"; then
-                # Use awk for more reliable multi-line config editing
-                awk -v wp="file://$wallpaper" '
-                    /^\[.*Wallpaper\]\[org\.kde\.image\]\[General\]/ { in_section=1 }
-                    /^\[/ && !/^\[.*Wallpaper\]\[org\.kde\.image\]\[General\]/ { in_section=0 }
-                    in_section && /^Image=/ { $0="Image=" wp }
-                    { print }
-                ' "$plasma_config" > "$plasma_config.tmp" && mv "$plasma_config.tmp" "$plasma_config"
-                ok "wallpaper configured in plasma config (applies after logout)"
-                success=true
-            fi
-        fi
-    fi
-
-    # Method 5: kwriteconfig6 for all detected containments
-    if [ "$success" = false ] && command -v kwriteconfig6 >/dev/null 2>&1; then
-        local plasma_config="$HOME/.config/plasma-org.kde.plasma.desktop-appletsrc"
-        if [ -f "$plasma_config" ]; then
-            # Find all containment IDs that have wallpaper settings
-            local containments
-            containments=$(grep -oP '^\[Containments\]\[\K[0-9]+(?=\])' "$plasma_config" 2>/dev/null | sort -u || true)
-            
-            if [ -n "$containments" ]; then
-                for cid in $containments; do
-                    kwriteconfig6 --file plasma-org.kde.plasma.desktop-appletsrc \
-                        --group "Containments" --group "$cid" --group "Wallpaper" \
-                        --group "org.kde.image" --group "General" \
-                        --key "Image" "file://$wallpaper" 2>/dev/null || true
-                done
-                ok "wallpaper set via kwriteconfig6 (applies after logout)"
-                success=true
-            fi
-        fi
-        
-        # Fallback: set for containment 1 if no containments found
-        if [ "$success" = false ]; then
-            kwriteconfig6 --file plasma-org.kde.plasma.desktop-appletsrc \
-                --group "Containments" --group "1" --group "Wallpaper" \
-                --group "org.kde.image" --group "General" \
-                --key "Image" "file://$wallpaper" 2>/dev/null
-            ok "wallpaper set via kwriteconfig6 (default containment, applies after logout)"
-            success=true
-        fi
-    fi
-
-    if [ "$success" = false ]; then
-        warn "could not set wallpaper automatically — please set manually in System Settings"
+    if [ "$config_success" = true ]; then
+        ok "wallpaper will persist after reboot"
+        return 0
+    else
+        warn "could not modify config file — wallpaper may not persist after reboot"
+        warn "please set wallpaper manually in System Settings → Wallpaper"
         return 1
     fi
-
-    return 0
 }
 
 apply_kde_theme_settings() {
