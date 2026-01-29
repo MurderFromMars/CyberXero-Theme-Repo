@@ -6,7 +6,7 @@ set -euo pipefail
 # CYBERXERO :: NEON SYSTEM INITIALIZER
 ########################################
 
-REPO_DIR="$HOME/CyberXero-Theme-Repo"
+REPO_DIR="$HOME/CyberXero"
 BACKUP_DIR="$HOME/CyberXero-backup-$(date +%Y%m%d_%H%M%S)"
 DISTRO="unknown"
 
@@ -22,9 +22,9 @@ section() {
 }
 
 subsection() {
-    printf "\n\033[1;36m┌─────────────────────────────────────────────────────┐\033[0m\n"
+    printf "\n\033[1;36m┌─────────────────────────────────────────────────────────┐\033[0m\n"
     printf "\033[1;36m│\033[0m  %-50s \033[1;36m│\033[0m\n" "$1"
-    printf "\033[1;36m└─────────────────────────────────────────────────────┘\033[0m\n"
+    printf "\033[1;36m└─────────────────────────────────────────────────────────┘\033[0m\n"
 }
 
 backup_file() {
@@ -40,7 +40,7 @@ fetch_repo() {
     log "syncing CyberXero repository…"
 
     if [ ! -d "$REPO_DIR/.git" ]; then
-        if git clone https://github.com/MurderFromMars/CyberXero-Theme-Repo "$REPO_DIR" 2>&1 | grep -v -E "^(remote:|Receiving|Resolving|Counting)" | grep -v "^$" || false; then
+        if git clone https://github.com/MurderFromMars/CyberXero "$REPO_DIR" 2>&1 | grep -v -E "^(remote:|Receiving|Resolving|Counting)" | grep -v "^$" || false; then
             ok "repository cloned"
         else
             err "failed to clone repository"
@@ -471,12 +471,127 @@ deploy_wallpapers() {
     done
 }
 
+set_active_wallpaper() {
+    log "setting active wallpaper → cyberfield.jpg…"
+
+    local wallpaper="$HOME/Pictures/cyberfield.jpg"
+
+    # Verify the wallpaper file exists
+    if [ ! -f "$wallpaper" ]; then
+        warn "wallpaper file not found: $wallpaper"
+        return 1
+    fi
+
+    local success=false
+
+    # Method 1: plasma-apply-wallpaperimage (Plasma 6 preferred method)
+    if command -v plasma-apply-wallpaperimage >/dev/null 2>&1; then
+        if plasma-apply-wallpaperimage "$wallpaper" 2>/dev/null; then
+            ok "wallpaper set via plasma-apply-wallpaperimage"
+            success=true
+        fi
+    fi
+
+    # Method 2: qdbus6 with Plasma Shell scripting (covers all monitors)
+    if [ "$success" = false ] && command -v qdbus6 >/dev/null 2>&1; then
+        local script="
+            const allDesktops = desktops();
+            for (const desktop of allDesktops) {
+                desktop.wallpaperPlugin = 'org.kde.image';
+                desktop.currentConfigGroup = ['Wallpaper', 'org.kde.image', 'General'];
+                desktop.writeConfig('Image', 'file://$wallpaper');
+            }
+        "
+        if qdbus6 org.kde.plasmashell /PlasmaShell org.kde.PlasmaShell.evaluateScript "$script" 2>/dev/null; then
+            ok "wallpaper set via qdbus6"
+            success=true
+        fi
+    fi
+
+    # Method 3: qdbus (Plasma 5 fallback)
+    if [ "$success" = false ] && command -v qdbus >/dev/null 2>&1; then
+        local script="
+            var allDesktops = desktops();
+            for (var i = 0; i < allDesktops.length; i++) {
+                var d = allDesktops[i];
+                d.wallpaperPlugin = 'org.kde.image';
+                d.currentConfigGroup = ['Wallpaper', 'org.kde.image', 'General'];
+                d.writeConfig('Image', 'file://$wallpaper');
+            }
+        "
+        if qdbus org.kde.plasmashell /PlasmaShell org.kde.PlasmaShell.evaluateScript "$script" 2>/dev/null; then
+            ok "wallpaper set via qdbus (Plasma 5)"
+            success=true
+        fi
+    fi
+
+    # Method 4: Direct config file modification (deferred until logout)
+    if [ "$success" = false ]; then
+        local plasma_config="$HOME/.config/plasma-org.kde.plasma.desktop-appletsrc"
+        if [ -f "$plasma_config" ]; then
+            # Backup before modification
+            backup_file "$plasma_config"
+            
+            # Update all Image= entries under org.kde.image wallpaper sections
+            if grep -q "org.kde.image" "$plasma_config"; then
+                # Use awk for more reliable multi-line config editing
+                awk -v wp="file://$wallpaper" '
+                    /^\[.*Wallpaper\]\[org\.kde\.image\]\[General\]/ { in_section=1 }
+                    /^\[/ && !/^\[.*Wallpaper\]\[org\.kde\.image\]\[General\]/ { in_section=0 }
+                    in_section && /^Image=/ { $0="Image=" wp }
+                    { print }
+                ' "$plasma_config" > "$plasma_config.tmp" && mv "$plasma_config.tmp" "$plasma_config"
+                ok "wallpaper configured in plasma config (applies after logout)"
+                success=true
+            fi
+        fi
+    fi
+
+    # Method 5: kwriteconfig6 for all detected containments
+    if [ "$success" = false ] && command -v kwriteconfig6 >/dev/null 2>&1; then
+        local plasma_config="$HOME/.config/plasma-org.kde.plasma.desktop-appletsrc"
+        if [ -f "$plasma_config" ]; then
+            # Find all containment IDs that have wallpaper settings
+            local containments
+            containments=$(grep -oP '^\[Containments\]\[\K[0-9]+(?=\])' "$plasma_config" 2>/dev/null | sort -u || true)
+            
+            if [ -n "$containments" ]; then
+                for cid in $containments; do
+                    kwriteconfig6 --file plasma-org.kde.plasma.desktop-appletsrc \
+                        --group "Containments" --group "$cid" --group "Wallpaper" \
+                        --group "org.kde.image" --group "General" \
+                        --key "Image" "file://$wallpaper" 2>/dev/null || true
+                done
+                ok "wallpaper set via kwriteconfig6 (applies after logout)"
+                success=true
+            fi
+        fi
+        
+        # Fallback: set for containment 1 if no containments found
+        if [ "$success" = false ]; then
+            kwriteconfig6 --file plasma-org.kde.plasma.desktop-appletsrc \
+                --group "Containments" --group "1" --group "Wallpaper" \
+                --group "org.kde.image" --group "General" \
+                --key "Image" "file://$wallpaper" 2>/dev/null
+            ok "wallpaper set via kwriteconfig6 (default containment, applies after logout)"
+            success=true
+        fi
+    fi
+
+    if [ "$success" = false ]; then
+        warn "could not set wallpaper automatically — please set manually in System Settings"
+        return 1
+    fi
+
+    return 0
+}
+
 apply_kde_theme_settings() {
     log "activating neon theme parameters…"
 
     # Set color scheme using plasma-apply-colorscheme
     if command -v plasma-apply-colorscheme >/dev/null 2>&1; then
-        plasma-apply-colorscheme CyberXero
+        plasma-apply-colorscheme CyberXero 2>/dev/null || true
         ok "color scheme activated → CyberXero"
     else
         warn "plasma-apply-colorscheme not found"
@@ -502,18 +617,13 @@ apply_kde_theme_settings() {
         ok "kyanite enabled"
     fi
 
-    # Reconfigure KWin to apply script changes
+    # Set the active wallpaper
+    set_active_wallpaper
+
+    # Reconfigure KWin to apply script changes (safe operation)
     if command -v qdbus6 >/dev/null 2>&1; then
         qdbus6 org.kde.KWin /KWin reconfigure 2>/dev/null || true
         ok "KWin reconfigured"
-    fi
-
-    # Refresh KDE settings
-    if command -v kquitapp6 >/dev/null 2>&1; then
-        kquitapp6 plasmashell 2>/dev/null || true
-        sleep 2
-        nohup plasmashell >/dev/null 2>&1 &
-        ok "plasmashell restarted"
     fi
 }
 
@@ -556,9 +666,12 @@ main() {
     printf "\n\033[1;35m╔═══════════════════════════════════════════════════════╗\033[0m\n"
     printf "\033[1;35m║\033[0m  \033[1;32mCYBERXERO DEPLOYMENT COMPLETE\033[0m                    \033[1;35m║\033[0m\n"
     printf "\033[1;35m╚═══════════════════════════════════════════════════════╝\033[0m\n\n"
-    printf "\033[1;36m📦 Backup archive:\033[0m $BACKUP_DIR\n"
+    printf "\033[1;36m📦 Backup archive:\033[0m %s\n" "$BACKUP_DIR"
     printf "\033[1;36m📋 Auto-rebuild logs:\033[0m /var/log/kde-rounded-corners-rebuild.log\n\n"
-    printf "\033[1;33m⚠️  Please log out and log back in for all changes to take effect.\033[0m\n\n"
+    printf "\033[1;31m╔═══════════════════════════════════════════════════════╗\033[0m\n"
+    printf "\033[1;31m║  ⚠️  ACTION REQUIRED: LOG OUT OR REBOOT NOW           ║\033[0m\n"
+    printf "\033[1;31m║     to fully apply all theme changes!                 ║\033[0m\n"
+    printf "\033[1;31m╚═══════════════════════════════════════════════════════╝\033[0m\n\n"
 }
 
 main "$@"
