@@ -468,7 +468,6 @@ deploy_wallpapers() {
     local images=(
         cyberfield.jpg
         cyberxero.png
-        cyberxero2.png
     )
 
     for img in "${images[@]}"; do
@@ -479,6 +478,15 @@ deploy_wallpapers() {
             warn "missing → $img"
         fi
     done
+
+    # Deploy cyberxero2.png to system icons directory
+    if [ -f "$REPO_DIR/cyberxero2.png" ]; then
+        sudo mkdir -p /usr/local/share/icons
+        sudo cp "$REPO_DIR/cyberxero2.png" /usr/local/share/icons/
+        ok "icon → cyberxero2.png → /usr/local/share/icons"
+    else
+        warn "missing → cyberxero2.png"
+    fi
 }
 
 set_active_wallpaper() {
