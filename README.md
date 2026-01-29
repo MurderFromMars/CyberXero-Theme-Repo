@@ -31,7 +31,7 @@ CyberXero integrates several excellent community projects. Full credit and thank
 |---------|--------|-------------|
 | [Krohnkite](https://github.com/anametologin/krohnkite) | anametologin | Dynamic tiling window management for KWin |
 | [plasma-panel-colorizer](https://github.com/luisbocanegra/plasma-panel-colorizer) | luisbocanegra | Dynamic panel theming and colorization |
-| [kurve](https://github.com/luisbocanegra/kurve) | luisbocanegra | UI motion and animation enhancements |
+| [kurve](https://github.com/luisbocanegra/kurve) | luisbocanegra | panel audio visualizer widget |
 | [KDE-Rounded-Corners](https://github.com/matinlotfali/KDE-Rounded-Corners) | matinlotfali | Rounded corners and window shadows for KWin |
 | [Modern Clock](https://github.com/prayag2/modern-clock) | prayag2 | Minimal clock widget for Plasma |
 | [YAMIS](https://github.com/xenlism/Yami) | xenlism | Icon theme |
