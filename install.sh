@@ -364,23 +364,11 @@ deploy_config_folders() {
 deploy_rc_files() {
     log "deploying plasma rc files…"
 
-    # kglobalaccel holds shortcuts in memory and writes on exit — stop it first
-    if command -v kquitapp6 >/dev/null 2>&1; then
-        kquitapp6 kglobalaccel 2>/dev/null || true
-        sleep 1
-        log "stopped kglobalaccel daemon"
-    elif command -v kquitapp5 >/dev/null 2>&1; then
-        kquitapp5 kglobalaccel 2>/dev/null || true
-        sleep 1
-        log "stopped kglobalaccel daemon"
-    fi
-
     local rc_files=(
         kwinrc
         plasmarc
         plasma-org.kde.plasma.desktop-appletsrc
         breezerc
-        kglobalshortcutsrc
     )
 
     for rc in "${rc_files[@]}"; do
@@ -392,15 +380,6 @@ deploy_rc_files() {
             warn "missing → $rc"
         fi
     done
-
-    # Restart kglobalaccel so it reads the new config
-    if command -v kstart6 >/dev/null 2>&1; then
-        kstart6 --service kglobalaccel 2>/dev/null || true
-        log "restarted kglobalaccel daemon"
-    elif command -v kstart5 >/dev/null 2>&1; then
-        kstart5 --service kglobalaccel 2>/dev/null || true
-        log "restarted kglobalaccel daemon"
-    fi
 }
 
 deploy_kwinrules() {
