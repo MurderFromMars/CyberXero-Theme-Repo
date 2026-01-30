@@ -1,6 +1,6 @@
 # CyberXero — Official XeroLinux Cyberpunk Plasma Theme
 
-**CyberXero** is a cyberpunk-inspired theme for **KDE Plasma 6**, branded as an official theme of **XeroLinux**,(The KDE Tiling Special) but it is **not exclusive** to XeroLinux.  
+**CyberXero** is a cyberpunk-inspired theme for **KDE Plasma 6**, branded as an official theme of **XeroLinux**, (The KDE Tiling Special) but it is **not exclusive** to XeroLinux.  
 It transforms Plasma into a futuristic, dynamic tiling window manager (TWM) setup with neon visuals and productivity-focused workflow enhancements.
 
 CyberXero integrates advanced visual effects, KWin scripts, and curated configurations to deliver a fully immersive cyberpunk desktop experience.
