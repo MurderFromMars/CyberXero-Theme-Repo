@@ -147,4 +147,4 @@ This allows you to restore previous configurations manually if needed.
 
 ##  License
 
-CyberXero script is distributed under the MIT license. all projects build by, or included in the script retain their original licensing 
+CyberXero script is distributed under the MIT license. all projects built by, or included in the script retain their original licensing 
