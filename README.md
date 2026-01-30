@@ -30,13 +30,13 @@ This command downloads the installer and deploys the full CyberXero environment 
 - **Krohnkite:** dynamic tiling KWin script  
 - **Kyanite:** **true GNOME-style dynamic workspace management** for Plasma 6, authored by me  
 - Plasma panel colorizer
-- Kurve window effects
-- KDE Rounded Corners compiled from source
+- Kurve Cava powered audio visualizer for KDE Panels
+- KDE Rounded Corners custom window rounding and shadow/border effects
 
 **Configuration Management:**
 - Automatic backup of your configuration files
-- Deployment of preconfigured Plasma and KWin configuration files
-- Auto-rebuild system for KDE Rounded Corners after KWin updates
+- Deployment of preconfigured Plasma and KWin configuration files including btop, kitty, fastfetch, and cava configurarions
+- Auto rebuild system for KDE Rounded Corners after KWin updates
 
 **Advanced Automation:**
 - Removes existing Plasma panels safely during deployment
@@ -58,7 +58,7 @@ This command downloads the installer and deploys the full CyberXero environment 
 - Active Plasma session
 - Internet connectivity
 - Sudo privileges
-
+- Wayland only
 -------------------------------------------------------------------------------
 
 ##  Technology Highlights
