@@ -1,276 +1,146 @@
-# CyberXero  
-Neon Dynamic KDE Plasma Environment
----
+# CyberXero
 
-**Since this theme was originally created for the XeroLinux Project it contains XeroLinux Branding by default however, it supports debian based and arch based distros of all kinds and i will be including seperate fetch and launcher logos for vanilla Arch and PikaOS which  can be manually swapped for the XeroLinux versions.**
-## Overview
----
+A Neon Cyberpunk Tiling Experience for KDE Plasma 6
 
-CyberXero is a fully automated KDE Plasma 6 environment initializer that transforms a stock Plasma installation into a cohesive, behavior driven desktop.
+CyberXero began as the official KDE tiling theme I created for XeroLinux. After completing the design, DarkXero approved the final version, but the theme was complex enough that no simple installer existed for it. I took it upon myself to build that installation script, and in the process the project evolved far beyond a theme.
 
-This project is not just a theme. It is a complete system configuration that installs dependencies, builds required components, deploys curated configuration files, and activates a workflow centered around dynamic tiling and true GNOME style dynamic workspaces.
+Today, CyberXero is a complete Plasma 6 transformation engine. It reshapes KDE into a cohesive tiling window manager experience with a neon cyberpunk aesthetic, dynamic GNOME‑style workspaces, and a fully automated setup process that rebuilds your desktop from the ground up.
+What CyberXero Is
 
-The goal of CyberXero is to reshape how Plasma behaves, not merely how it looks.
+## CyberXero is not a theme pack
+---.
+It is a behavior‑driven desktop environment initializer that:
 
-All configuration changes are backed up automatically before being applied.
+• Converts Plasma into a dynamic tiling environment
+• Adds true GNOME‑style dynamic workspaces
+• Applies a unified neon cyberpunk visual identity
+• Installs and configures all required components automatically
+• Backs up your existing configuration before making changes
 
----
-
-## Quick Install
-
-Run the following command from any shell. The script will execute using Bash.
-
+The result is a Plasma experience that feels more like a modern TWM than a traditional desktop.
+Quick Install
 ```
-curl -fsSL https://raw.githubusercontent.com/MurderFromMars/CyberXero/main/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/MurderFromMars/CyberXero/main/install.sh  | bash
 ```
-
+# Core Features
 ---
 
-## Third Party Credits
+## Dynamic Workspaces (Kyanite)
 
-CyberXero integrates several excellent community projects. Full credit and thanks go to the original authors.
+Kyanite brings GNOME‑style dynamic workspaces to Plasma 6:
 
-| Project | Author | Description |
-|---------|--------|-------------|
-| [Krohnkite](https://github.com/anametologin/krohnkite) | anametologin | Dynamic tiling window management for KWin |
-| [plasma-panel-colorizer](https://github.com/luisbocanegra/plasma-panel-colorizer) | luisbocanegra | Dynamic panel theming and colorization |
-| [kurve](https://github.com/luisbocanegra/kurve) | luisbocanegra | Panel audio visualizer widget |
-| [KDE-Rounded-Corners](https://github.com/matinlotfali/KDE-Rounded-Corners) | matinlotfali | Rounded corners and window shadows for KWin |
-| [Modern Clock](https://github.com/prayag2/modern-clock) | prayag2 | Minimal clock widget for Plasma |
-| [YAMIS](https://github.com/xenlism/Yami) | xenlism | Icon theme |
+• Workspaces appear when needed
+• Empty workspaces disappear
+• One empty workspace is always available
+• Workspace lifecycle is driven entirely by window movement
 
-These projects are installed or built automatically during CyberXero deployment. They retain their original licenses.
+Kyanite is built specifically for Plasma 6 and is a core part of CyberXero.
+Repository: https://github.com/MurderFromMars/Kyanite
+Dynamic Tiling (Krohnkite)
 
+## Krohnkite provides automatic tiling inside each workspace:
+
+• Clean, predictable tiling behavior
+• Layout cycling
+• Window movement and focus navigation
+• Works seamlessly with Kyanite
+
+CyberXero includes my personal configuration for Krohnkite.
+users may need to adjust gaps depending on screen resolution to their liking.
+
+## CyberXero applies a cohesive neon cyberpunk aesthetic using:
+
+• plasma‑panel‑colorizer for dynamic panel theming
+• kurve for Cava‑powered audio visualization
+• KDE Rounded Corners for smooth edges and shadows
+• YAMIS icon theme
+• CyberXero color scheme
+
+The result is a unified, glowing, futuristic interface.
+Supported Systems
+
+# CyberXero supports:
 ---
 
-## Design Goals
-
-CyberXero is built around three core ideas.
-
-Dynamic workspaces that behave exactly like GNOME Shell  
-Dynamic tiling that integrates cleanly with KWin  
-A unified neon visual identity across the desktop  
-
-Static workspace counts, manual layout management, and fragmented visuals are intentionally avoided.
-
----
-
-## Core Components
-
-### Kyanite  
-GNOME Style Dynamic Workspaces for KDE Plasma 6
-
-Kyanite provides true GNOME style dynamic workspaces on KDE Plasma 6.
-
-This behavior does not exist natively in Plasma. Kyanite implements it directly at the KWin script level.
-
-Workspaces are created automatically when needed  
-Empty workspaces are removed automatically  
-There is always exactly one empty workspace  
-Workspace lifecycle is driven entirely by window movement  
-
-Kyanite targets Plasma 6 exclusively and is designed to be predictable, fast, and compositor friendly. It works alongside Krohnkite without managing tiling itself.
-
-Kyanite is designed and maintained by me and is a core part of the CyberXero environment.
-
-Repository  
-https://github.com/MurderFromMars/Kyanite
-
-Kyanite is installed, enabled, and activated automatically during CyberXero deployment.
-
----
-
-### Krohnkite  
-Dynamic Tiling Window Manager
-
-Krohnkite provides automatic tiling for application windows within each workspace. It handles window placement and layout while deferring workspace lifecycle entirely to Kyanite.
-
-CyberXero includes a bundled copy of Krohnkite with configuration tuned for the theme. Users on lower resolution monitors may need to adjust gap settings in **System Settings → Window Management → KWin Scripts → Krohnkite** to achieve the desired spacing between tiled windows.
-
----
-
-### Visual and UI Components
-
-plasma-panel-colorizer for deep panel customization
-kurve for cava powered audio visualizers integrated into the panel
-KDE Rounded Corners for true rounded window edges and themed window shadows  
-
----
-
-## Supported Systems
-
-CyberXero currently supports the following platforms.
-
-Arch Linux and Arch based distributions  
-Debian and Ubuntu based distributions  
-
-Other distributions are not supported.
+• Arch Linux and Arch‑based distributions
+• Debian and Ubuntu‑based distributions
 
 KDE Plasma 6 is required.
+What the Installer Does
+
+# The CyberXero initializer:
 
 ---
 
-## What the Script Does
+• Clones or updates the repository
+• Detects your distribution
+• Installs all required dependencies
+• Builds KDE components when needed
+• Deploys KWin scripts and enables them
+• Installs themes, icons, and color schemes
+• Applies curated configuration files
+• Restarts Plasma Shell to apply changes
 
-When executed, the CyberXero initializer performs the following actions.
+All existing configuration is backed up automatically.
+## Dependencies Installed
+Arch Linux
 
-The CyberXero repository is cloned or updated  
-The host distribution is detected automatically  
-System dependencies are installed  
-Required KDE components are built and installed  
-KWin scripts are deployed and enabled  
-Icon theme and color scheme are installed  
-Curated configuration files are deployed  
-KDE settings are applied automatically  
-Plasma Shell is restarted to apply changes  
+• git
+• cmake
+• extra‑cmake‑modules
+• base‑devel
+• unzip
+• qt5‑tools (via yay or paru when available)
+Debian / Ubuntu
 
-The process is designed to be repeatable and mostly idempotent.
+• git
+• cmake
+• g++
+• extra‑cmake‑modules
+• kwin‑dev
+• qt6 base and development tools
+• KDE Frameworks 6 development libraries
+Configuration Applied
+Directories (to ~/.config)
 
----
-
-## Installed Dependencies
-
-### Arch Linux
-
-git  
-cmake  
-extra-cmake-modules  
-base-devel  
-unzip  
-qt5-tools via yay or paru when available  
-
-### Debian and Ubuntu
-
-git  
-cmake  
-g++  
-extra-cmake-modules  
-kwin-dev  
-qt6 base and development tools  
-KDE Frameworks 6 development libraries  
-
----
-
-## Configuration Deployed
-
-### Configuration Directories
-
-The following directories are deployed to ~/.config.
-
-kitty  
-btop  
-fastfetch  
-cava
+• kitty
+• btop
+• fastfetch
+• cava
 
 Existing directories are backed up before replacement.
+KDE Configuration Files (to ~/.config)
+
+• kwinrc
+• plasmarc
+• plasma‑org.kde.plasma.desktop‑appletsrc
+• kwinrulesrc
+• breezerc
+Themes
+
+• Color Scheme: CyberXero
+• Icon Theme: YAMIS (installed to ~/.local/share/icons)
+KWin Scripts Enabled
+
+• Krohnkite for tiling
+• Kyanite for dynamic workspaces
+
+KWin is reloaded automatically.
+Backups
+
+Before any changes are made, CyberXero creates a timestamped backup:
+
+~/CyberXero‑backup‑YYYYMMDD_HHMMSS
+
+
+# Configure Keybindings (Required)
 
 ---
 
-### KDE Configuration Files
+CyberXero does not install keybindings.
+Set them manually under:
 
-The following files are installed into ~/.config.
+System Settings → Shortcuts
 
-kwinrc  
-plasmarc  
-plasma-org.kde.plasma.desktop-appletsrc  
-kwinrulesrc  
-breezerc
+I recommend at minimum setting keybinds for  close, minimiz, and maximize windows
 
----
-
-### Themes
-
-Color scheme  
-CyberXero  
-
-Icon theme  
-YAMIS  
-
-The YAMIS icon theme is installed locally under ~/.local/share/icons.
-
----
-
-## KWin Scripts Enabled
-
-The following KWin scripts are enabled automatically.
-
-Krohnkite for dynamic tiling  
-Kyanite for GNOME style dynamic workspace management  
-
-KWin is reconfigured live to apply these changes.
-
----
-
-## Backups
-
-Before any existing configuration is modified, a timestamped backup directory is created.
-
-Example location  
-~/CyberXero-backup-YYYYMMDD_HHMMSS
-
-This includes previous configuration directories and KDE rc files.
-
-Manual restoration is always possible by copying files back from this directory.
-
----
-
-## Installation
-
-### Manual Install
-
-Clone the repository.
-
-```
-git clone https://github.com/MurderFromMars/CyberXero
-cd CyberXero
-```
-
-Make the script executable and run it.
-
-```
-chmod +x install.sh
-./install.sh
-```
-
-Root privileges are required for dependency installation.
-
----
-
-## Post Installation
-
-### Required: Configure Keybindings
-
-CyberXero does not install custom keybindings. You must configure these manually after installation.
-
-Open **System Settings → Shortcuts** to configure global shortcuts.
-
-For Krohnkite tiling controls, navigate to **System Settings → Window Management → KWin Scripts → Krohnkite** and configure keybindings there.
-
-Recommended bindings to configure:
-
-- Window focus navigation (up, down, left, right)
-- Window movement between tiles
-- Layout cycling
-- Workspace switching
-- Window to workspace movement
-
-### Additional Notes
-
-Some effects may require a full logout and login to behave correctly.  
-Workspace behavior is entirely controlled by Kyanite and does not require manual configuration.
-
----
-
-## Philosophy
-
-CyberXero treats workspaces as ephemeral state, not configuration.
-
-A desktop environment should adapt to how windows are used, not force the user to manage layout and workspace counts manually. CyberXero applies this principle consistently across window management, workspace lifecycle, and visual design.
-
----
-
-## License
-
-The CyberXero initializer script and configuration are provided under the MIT License.
-
-Third party components installed or built by this script are distributed under their respective licenses. CyberXero does not modify the licensing terms of any bundled or external software.
