@@ -82,8 +82,12 @@ What the Installer Does
 • Restarts Plasma Shell to apply changes
 
 All existing configuration is backed up automatically.
-## Dependencies Installed
-Arch Linux
+
+
+# Dependencies Installed
+---
+
+## Arch Linux
 
 • git
 • cmake
@@ -91,7 +95,8 @@ Arch Linux
 • base‑devel
 • unzip
 • qt5‑tools (via yay or paru when available)
-Debian / Ubuntu
+
+## Debian / Ubuntu
 
 • git
 • cmake
