@@ -2,7 +2,7 @@
 Neon Dynamic KDE Plasma Environment
 ---
 
-**as this theme was originally created for the XeroLinux Project it contains XeroLinux Branding by default however, it supports debian based and arch based distros of all kinds and i will be including seperate fetch and launcher logos for vanilla Arch and PikaOS which  can be manually swapped for the XeroLinux versions.**
+**Since this theme was originally created for the XeroLinux Project it contains XeroLinux Branding by default however, it supports debian based and arch based distros of all kinds and i will be including seperate fetch and launcher logos for vanilla Arch and PikaOS which  can be manually swapped for the XeroLinux versions.**
 ## Overview
 ---
 
