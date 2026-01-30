@@ -4,7 +4,7 @@
 It transforms Plasma into a futuristic, dynamic tiling window manager (TWM) setup with neon visuals and productivity-focused workflow enhancements.
 
 CyberXero integrates advanced visual effects, KWin scripts, and curated configurations to deliver a fully immersive cyberpunk desktop experience.
-***I will be including logos for vanilla Arch and PikaOS which can be manually swapped with the XeroLinux logos**
+***I will be including logos for vanilla Arch and PikaOS which can be manually swapped with the XeroLinux logos***
 
 -------------------------------------------------------------------------------
 
